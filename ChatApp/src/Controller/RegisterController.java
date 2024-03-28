@@ -20,7 +20,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 
-public class MainSceneController implements Initializable{
+public class RegisterController implements Initializable{
 
     private Stage stage;
     private Scene scene;
