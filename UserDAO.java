@@ -170,6 +170,22 @@ public class UserDAO extends DAO<UserInformation> {
         }
     }
 
+
+    public boolean userExistsByName(String name) {
+        try {
+            ResultSet result = this.connect.createStatement(
+                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY)
+                    .executeQuery(String.format("SELECT * FROM user WHERE username LIKE '%s'", name));
+            if (result.first())
+                return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     // generted a hash using
     public static boolean verifyPassword(String password, String storedHash) {
         // Generate a hash for the provided password
