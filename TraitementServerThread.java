@@ -110,6 +110,7 @@ public class TraitementServerThread implements Runnable {
                         break;
 
                     case 3:
+                        System.out.println(userInformation.getUuid());
                         LinkedList<UserInformation> amis = user_orm.findAll(userInformation.getUuid());
                         oos.writeObject(amis);
                         oos.flush();

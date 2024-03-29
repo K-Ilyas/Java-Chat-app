@@ -99,7 +99,7 @@ public class MessageToDAO extends DAO<MessageTo> {
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY)
                     .executeQuery(String.format(
-                            "SELECT * FROM MESSAGETO WHERE (uuid_sender = '%s' and uuid_reciver = '%s') or (uuid_reciver = '%s' and uuid_sender = '%s')",
+                            "SELECT * FROM messageto WHERE (uuid_sender = '%s' and uuid_reciver = '%s') or (uuid_reciver = '%s' and uuid_sender = '%s')",
                             uuid_sender, uuid_reciver, uuid_sender, uuid_reciver));
 
             while (result.next()) {
