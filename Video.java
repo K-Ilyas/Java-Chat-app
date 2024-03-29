@@ -1,28 +1,87 @@
-import java.io.File;
-import java.io.IOException;
+
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
 
-import com.github.sarxos.webcam.Webcam;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 
-public class Video {
+public class Video extends Application {
 
-    public static void main(String[] args) {
-         // This Java code snippet is capturing an image from the default webcam connected to the
-         // system. Here's a breakdown of what each part does:
-         Webcam webcam = Webcam.getDefault();
-        webcam.open();
-        java.awt.image.BufferedImage image = webcam.getImage();
+    private ImageView remoteVideoView;
 
-        // Save the image (you can customize the filename)
-        File outputFile = new File("webcam_image.jpg");
-        try {
-            ImageIO.write(image, "JPG", outputFile);
+    @Override
+    public void start(Stage primaryStage) {
+        remoteVideoView = new ImageView();
+        VBox root = new VBox(remoteVideoView);
+        Scene scene = new Scene(root, 640, 480);
+
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Video Chat App");
+        primaryStage.show();
+
+        // Start video server
+        new Thread(() -> {
+            try {
+                startVideoServer();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void startVideoServer() throws ClassNotFoundException {
+        try (ServerSocket serverSocket = new ServerSocket(8080);ServerSocket serverSocketAudio = new ServerSocket(8081) ) {
+
+            System.out.println("Waiting for client connection...");
+            System.out.println("wait...");
+
+            Socket clientSocket = serverSocket.accept();
+            Socket clientSocketAudio = serverSocketAudio.accept();
+
+            System.out.println("Client connected!");
+             
+
+            try (InputStream inner = clientSocket.getInputStream();InputStream innerAudio = clientSocketAudio.getInputStream(); ObjectInputStream in = new ObjectInputStream(inner)) {
+
+                new ListenAudio(innerAudio).start();
+
+                while (true) {
+                    // Capture video frame from webcam
+                    // BufferedImage image = webcam.getImage();
+                    byte[] imageData = (byte[]) in.readObject();
+
+                    // Convert byte array back to BufferedImage
+                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageData);
+                    BufferedImage image = ImageIO.read(byteArrayInputStream);
+                    
+
+                    // Convert BufferedImage to JavaFX Image and display
+                    Image fxImage = SwingFXUtils.toFXImage(image, null);
+                    Platform.runLater(() -> {
+                        remoteVideoView.setImage(fxImage);
+                    });
+                    
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Close the webcam
-        webcam.close();
     }
-    
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

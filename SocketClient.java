@@ -4,7 +4,6 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
@@ -406,35 +405,49 @@ public class SocketClient {
         SocketClient client = new SocketClient();
         // client.startConversation();
 
-        UserInformation user = client.login("ILYAS", "ILYAS");
+        UserInformation user = client.login("Amine", "ahmed");
 
-        System.out.println(user);
-
-        LinkedList<UserInformation> userList = client.getUsers();
-
-        for (int index = 0; index < userList.size(); index++) {
-        System.out.println(userList.get(index));
-        }
-
-        LinkedList<MessageTo> messageList = client.getMessages(user,
-        userList.get(0));
-
-        for (int index = 0; index < messageList.size(); index++) {
-        System.out.println(messageList.get(index));
-        }
-
-        client.sendMessage("Hello", user, userList.get(0));
-
-        System.out.println("Message sent :#########################################################################");
-
-        messageList = client.getMessages(user, userList.get(0));
-
-        for (int index = 0; index < messageList.size(); index++) {
-        System.out.println(messageList.get(index));
-        }
-
-        client.brodcastMessage("Hello", user);
+        System.out.println(user.getUuid());
         client.logOut(user);
+
+        // LinkedList<UserInformation> userList = client.getUsers();
+
+        // for (int index = 0; index < userList.size(); index++) {
+        // System.out.println(userList.get(index));
+        // }
+
+        // LinkedList<MessageTo> messageList = client.getMessages(user,
+        // userList.get(0));
+
+        // for (int index = 0; index < messageList.size(); index++) {
+        // System.out.println(messageList.get(index));
+        // }
+
+        // client.sendMessage("Hello", user, userList.get(0));
+
+        // System.out.println("Message sent
+        // :#########################################################################");
+
+        // messageList = client.getMessages(user, userList.get(0));
+
+        // for (int index = 0; index < messageList.size(); index++) {
+        // System.out.println(messageList.get(index));
+        // }
+
+        // client.sendMessage("Hello", user, userList.get(0));
+
+        // System.out.println("Message sent
+        // :#########################################################################");
+
+        // messageList = client.getMessages(user, userList.get(0));
+
+        // for (int index = 0; index < messageList.size(); index++) {
+        // System.out.println(messageList.get(index));
+        // }
+
+        // client.brodcastMessage("Hello", user);
+
+        // client.logOut(user);
 
         // Webcam webcam = Webcam.getDefault();
         // webcam.open();
@@ -443,9 +456,9 @@ public class SocketClient {
         // // Save the image (you can customize the filename)
         // File outputFile = new File("webcam_image.jpg");
         // try {
-        //     ImageIO.write(image, "JPG", outputFile);
+        // ImageIO.write(image, "JPG", outputFile);
         // } catch (IOException e) {
-        //     e.printStackTrace();
+        // e.printStackTrace();
         // }
 
         // // Close the webcam

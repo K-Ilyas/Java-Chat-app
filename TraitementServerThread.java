@@ -52,13 +52,14 @@ public class TraitementServerThread implements Runnable {
                             e.printStackTrace();
                         }
 
-                        userInformation = user_orm.find(userInformation.getPseudo());
-                        if (userInformation != null) {
+                        userInformation = user_orm.findAndCheckPassword(userInformation);
 
+
+                        System.out.println(userInformation.getUuid() + " - " + userInformation.getPseudo());
+                        if (!userInformation.getUuid().equals("")) {
                             if (!this.socketServer.isLogedInOrInit(userInformation, this.client)) {
                                 this.socketServer.addUser(userInformation, client);
                             }
-            
                             dos.writeInt(1);
                             dos.writeUTF("SERVER : YOUR CONNEXION HAS ESTABLISHED SUCCESFULLY");
                             dos.flush();
@@ -232,108 +233,111 @@ public class TraitementServerThread implements Runnable {
 
             // while (isTrue) {
 
-            //     message = dis.readUTF();
-            //     System.out.println(message);
+            // message = dis.readUTF();
+            // System.out.println(message);
 
-            //     if (message.toUpperCase().equals("N")) {
-            //         isTrue = false;
-            //         userInformation = null;
-            //         try {
-            //             friend = (UserInformation) ois.readObject();
-            //             userInformation = (UserInformation) ois.readObject();
-            //         } catch (
+            // if (message.toUpperCase().equals("N")) {
+            // isTrue = false;
+            // userInformation = null;
+            // try {
+            // friend = (UserInformation) ois.readObject();
+            // userInformation = (UserInformation) ois.readObject();
+            // } catch (
 
-            //         ClassNotFoundException e) {
-            //             e.printStackTrace();
-            //         }
-            //         if (userInformation != null) {
+            // ClassNotFoundException e) {
+            // e.printStackTrace();
+            // }
+            // if (userInformation != null) {
 
-            //             if (this.socketServer.logOut(userInformation)) {
+            // if (this.socketServer.logOut(userInformation)) {
 
-            //                 dos.writeInt(0);
-            //                 dos.writeUTF("SERVER : YOUR LOG OUT SUCCESFLY");
-            //                 dos.flush();
-            //                 ServerLogs.printLog("SERVER : bye bye" + userInformation.getUuid() + " - "
-            //                         + userInformation.getPseudo() + " !!!!");
-            //                 isTrue = false;
+            // dos.writeInt(0);
+            // dos.writeUTF("SERVER : YOUR LOG OUT SUCCESFLY");
+            // dos.flush();
+            // ServerLogs.printLog("SERVER : bye bye" + userInformation.getUuid() + " - "
+            // + userInformation.getPseudo() + " !!!!");
+            // isTrue = false;
 
-            //             } else {
-            //                 dos.writeInt(0);
-            //                 dos.writeUTF("SERVER :SOMETHING WENT WRONG PLEASE RETRY!!!");
-            //                 dos.flush();
-            //             }
-            //         } else {
-            //             dos.writeInt(0);
-            //             dos.writeUTF("SERVER : YOUR SENDED OBJECT IS NULL !!!");
-            //             dos.flush();
-            //             ServerLogs.printLog("SERVER : YOU HAVE AN ERROR, YOUR CONNECTION FAILD !!");
-            //         }
+            // } else {
+            // dos.writeInt(0);
+            // dos.writeUTF("SERVER :SOMETHING WENT WRONG PLEASE RETRY!!!");
+            // dos.flush();
+            // }
+            // } else {
+            // dos.writeInt(0);
+            // dos.writeUTF("SERVER : YOUR SENDED OBJECT IS NULL !!!");
+            // dos.flush();
+            // ServerLogs.printLog("SERVER : YOU HAVE AN ERROR, YOUR CONNECTION FAILD !!");
+            // }
 
-            //     } else {
+            // } else {
 
-            //         try {
-            //             friend = (UserInformation) ois.readObject();
-            //             userInformation = (UserInformation) ois.readObject();
-            //         } catch (ClassNotFoundException e) {
-            //             e.printStackTrace();
-            //         }
+            // try {
+            // friend = (UserInformation) ois.readObject();
+            // userInformation = (UserInformation) ois.readObject();
+            // } catch (ClassNotFoundException e) {
+            // e.printStackTrace();
+            // }
 
-            //         if (!message.equals("")) {
+            // if (!message.equals("")) {
 
-            //             Socket reciver = this.socketServer.findUserSocket(friend.getUuid());
+            // Socket reciver = this.socketServer.findUserSocket(friend.getUuid());
 
-            //             MessageTo messageTo = new MessageTo(userInformation.getUuid(), friend.getUuid(), message,
-            //                     LocalDateTime.now().toString(), false);
-            //             message_orm.create(messageTo);
+            // MessageTo messageTo = new MessageTo(userInformation.getUuid(),
+            // friend.getUuid(), message,
+            // LocalDateTime.now().toString(), false);
+            // message_orm.create(messageTo);
 
-            //             dos.writeInt(1);
-            //             dos.writeUTF("you");
-            //             dos.writeUTF(messageTo.getMessage_date().toString());
-            //             dos.writeUTF(messageTo.getMessage());
-            //             dos.flush();
+            // dos.writeInt(1);
+            // dos.writeUTF("you");
+            // dos.writeUTF(messageTo.getMessage_date().toString());
+            // dos.writeUTF(messageTo.getMessage());
+            // dos.flush();
 
-            //             if (reciver != null) {
-            //                 try {
-            //                     OutputStream outRecive = reciver.getOutputStream();
-            //                     DataOutputStream dosRecive = new DataOutputStream(outRecive);
-            //                     dosRecive.writeInt(1);
-            //                     dosRecive.writeUTF(userInformation.getPseudo() + " - " + userInformation.getUuid());
-            //                     dosRecive.writeUTF(messageTo.getMessage_date().toString());
-            //                     dosRecive.writeUTF(messageTo.getMessage());
-            //                     dosRecive.flush();
-            //                     isTrue = true;
-            //                 } catch (FileNotFoundException e) {
-            //                     e.printStackTrace();
-            //                 } catch (IOException e) {
-            //                     e.printStackTrace();
-            //                 }
+            // if (reciver != null) {
+            // try {
+            // OutputStream outRecive = reciver.getOutputStream();
+            // DataOutputStream dosRecive = new DataOutputStream(outRecive);
+            // dosRecive.writeInt(1);
+            // dosRecive.writeUTF(userInformation.getPseudo() + " - " +
+            // userInformation.getUuid());
+            // dosRecive.writeUTF(messageTo.getMessage_date().toString());
+            // dosRecive.writeUTF(messageTo.getMessage());
+            // dosRecive.flush();
+            // isTrue = true;
+            // } catch (FileNotFoundException e) {
+            // e.printStackTrace();
+            // } catch (IOException e) {
+            // e.printStackTrace();
+            // }
 
-            //             }
-            //         } else {
+            // }
+            // } else {
 
-            //             ServerLogs.printLog("BROADCAST A MESSAGE TO THE SERVER");
-            //             Set<Entry<UserInformation, Socket>> users = this.socketServer.getCon_table().entrySet();
-            //             for (Entry<UserInformation, Socket> entry : users) {
-            //                 if (entry.getKey().compareTo(userInformation) != 0) {
-            //                     try {
-            //                         OutputStream outRecive = entry.getValue().getOutputStream();
-            //                         DataOutputStream dosRecive = new DataOutputStream(outRecive);
-            //                         dosRecive.writeInt(1);
-            //                         dosRecive.writeUTF(userInformation.getPseudo());
-            //                         dosRecive.writeUTF(LocalDateTime.now().toString());
-            //                         dosRecive.writeUTF(data);
-            //                         dosRecive.flush();
-            //                         isTrue = true;
-            //                     } catch (FileNotFoundException e) {
-            //                         e.printStackTrace();
-            //                     } catch (IOException e) {
-            //                         e.printStackTrace();
-            //                     }
-            //                 }
-            //             }
-            //         }
+            // ServerLogs.printLog("BROADCAST A MESSAGE TO THE SERVER");
+            // Set<Entry<UserInformation, Socket>> users =
+            // this.socketServer.getCon_table().entrySet();
+            // for (Entry<UserInformation, Socket> entry : users) {
+            // if (entry.getKey().compareTo(userInformation) != 0) {
+            // try {
+            // OutputStream outRecive = entry.getValue().getOutputStream();
+            // DataOutputStream dosRecive = new DataOutputStream(outRecive);
+            // dosRecive.writeInt(1);
+            // dosRecive.writeUTF(userInformation.getPseudo());
+            // dosRecive.writeUTF(LocalDateTime.now().toString());
+            // dosRecive.writeUTF(data);
+            // dosRecive.flush();
+            // isTrue = true;
+            // } catch (FileNotFoundException e) {
+            // e.printStackTrace();
+            // } catch (IOException e) {
+            // e.printStackTrace();
+            // }
+            // }
+            // }
+            // }
 
-                // }
+            // }
 
             // }
 

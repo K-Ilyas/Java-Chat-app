@@ -10,6 +10,8 @@ import java.util.Base64;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 public class UserDAO extends DAO<UserInformation> {
 
     public UserDAO(Connection conn) {
@@ -25,14 +27,15 @@ public class UserDAO extends DAO<UserInformation> {
 
             UserInformation user = this.find(obj.getPseudo());
             if (user == null) {
-                
+
                 String query = "INSERT INTO user (uuid_user, username, email, hashpasword, image, isadmin) VALUES (?, ?, ?, ?, ?, ?)";
                 statement = this.connect.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 statement.setString(1, uuid);
                 statement.setString(2, obj.getPseudo());
                 statement.setString(3, obj.getEmail());
                 // Hash the password before storing it
-                String hashedPassword = hashPassword(obj.getPassword());
+
+                String hashedPassword = BCrypt.hashpw(obj.getPassword(), BCrypt.gensalt());
                 statement.setString(4, hashedPassword);
                 statement.setString(5, obj.getImage());
                 statement.setBoolean(6, obj.getIsadmin());
@@ -204,6 +207,33 @@ public class UserDAO extends DAO<UserInformation> {
             e.printStackTrace();
         }
         return user;
+    }
+
+    public UserInformation findAndCheckPassword(UserInformation obj) {
+        try {
+            ResultSet result = this.connect.createStatement(
+                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY)
+                    .executeQuery(String.format("SELECT * FROM user WHERE uuid_user = '%s'",
+                            obj.getPseudo()));
+
+            if (result.first()) {
+                if (verifyPassword(obj.getPassword(), result.getString("hashpasword"))) {
+                    obj.setPassword(result.getString("hashpasword"));
+                    obj.setIsadmin(result.getBoolean("isadmin"));
+                    obj.setPseudo(result.getString("username"));
+                    obj.setUuid(result.getString("uuid_user"));
+                    obj.setImage(result.getString("image"));
+                    obj.setEmail(result.getString("email"));
+                } else {
+                    return null;
+                }
+            } else
+                return obj;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return obj;
     }
 
     public LinkedList<UserInformation> findAll(String uuid) {
