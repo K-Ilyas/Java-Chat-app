@@ -189,14 +189,14 @@ public class UserDAO extends DAO<UserInformation> {
         return true;
     }
 
-    // generted a hash using
-    public static boolean verifyPassword(String password, String storedHash) {
-        // Generate a hash for the provided password
-        String hashedPassword = hashPassword(password);
+    // // generted a hash using
+    // public static boolean verifyPassword(String password, String storedHash) {
+    //     // Generate a hash for the provided password
+    //     String hashedPassword = hashPassword(password);
 
-        // Compare the generated hash with the stored hash
-        return hashedPassword.equals(storedHash);
-    }
+    //     // Compare the generated hash with the stored hash
+    //     return hashedPassword.equals(storedHash);
+    // }
 
     @Override
     public UserInformation find(String uuid_username) {
@@ -230,22 +230,23 @@ public class UserDAO extends DAO<UserInformation> {
             ResultSet result = this.connect.createStatement(
                     ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY)
-                    .executeQuery(String.format("SELECT * FROM user WHERE uuid_user = '%s'",
+                    .executeQuery(String.format("SELECT * FROM user WHERE username = '%s'",
                             obj.getPseudo()));
 
             if (result.first()) {
-                if (verifyPassword(obj.getPassword(), result.getString("hashpasword"))) {
+
+
+                if (BCrypt.checkpw(obj.getPassword(), result.getString("hashpasword"))) {
+                    System.out.println("User found");
+
                     obj.setPassword(result.getString("hashpasword"));
                     obj.setIsadmin(result.getBoolean("isadmin"));
                     obj.setPseudo(result.getString("username"));
                     obj.setUuid(result.getString("uuid_user"));
                     obj.setImage(result.getString("image"));
                     obj.setEmail(result.getString("email"));
-                } else {
-                    return null;
                 }
-            } else
-                return obj;
+            } 
         } catch (SQLException e) {
             e.printStackTrace();
         }

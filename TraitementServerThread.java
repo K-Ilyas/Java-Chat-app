@@ -1,3 +1,4 @@
+import java.awt.SystemTray;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
@@ -53,9 +54,8 @@ public class TraitementServerThread implements Runnable {
                         }
 
                         userInformation = user_orm.findAndCheckPassword(userInformation);
+                        System.out.println(userInformation);
 
-
-                        System.out.println(userInformation.getUuid() + " - " + userInformation.getPseudo());
                         if (!userInformation.getUuid().equals("")) {
                             if (!this.socketServer.isLogedInOrInit(userInformation, this.client)) {
                                 this.socketServer.addUser(userInformation, client);
@@ -63,6 +63,7 @@ public class TraitementServerThread implements Runnable {
                             dos.writeInt(1);
                             dos.writeUTF("SERVER : YOUR CONNEXION HAS ESTABLISHED SUCCESFULLY");
                             dos.flush();
+
                             oos.writeObject(userInformation);
                             oos.flush();
                         } else {
@@ -89,7 +90,7 @@ public class TraitementServerThread implements Runnable {
 
                             if (user_orm.create(userInformation)) {
                                 System.out.println("user created :::" + userInformation.getUuid());
-                                this.socketServer.addUser(userInformation, this.client);
+                                // this.socketServer.addUser(userInformation, this.client);
                                 dos.writeInt(1);
                                 dos.writeUTF("SERVER : YOUR REGISTARTION HAS ESTABLISHED SUCCESFULY");
                                 dos.flush();

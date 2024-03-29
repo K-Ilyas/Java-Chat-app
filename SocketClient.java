@@ -64,6 +64,7 @@ public class SocketClient {
             dos.writeInt(1);
             dos.flush();
             user = new UserInformation(pseudo, password);
+            this.userInformation = user;
             bos.writeObject(user);
             bos.flush();
             int i = dis.readInt();
@@ -401,40 +402,19 @@ public class SocketClient {
 
     }
 
-    // public static void main(String[] args) throws ClassNotFoundException {
-    //     SocketClient client = new SocketClient();
-    //     // client.startConversation();
+    public static void main(String[] args) throws ClassNotFoundException {
+        SocketClient client = new SocketClient();
+        // client.startConversation();
 
-        UserInformation user = client.login("ILYAS", "ILYAS");
+        UserInformation user =null;
 
-        System.out.println(user);
 
-        LinkedList<UserInformation> userList = client.getUsers();
+        user = client.login("Amine", "ahmed");
 
-        for (int index = 0; index < userList.size(); index++) {
-        System.out.println(userList.get(index));
-        }
+        System.out.println(user.getPseudo() + " - " + user.getUuid());
 
-        LinkedList<MessageTo> messageList = client.getMessages(user,
-        userList.get(0));
-
-        for (int index = 0; index < messageList.size(); index++) {
-        System.out.println(messageList.get(index));
-        }
-
-        client.sendMessage("Hello", user, userList.get(0));
-
-        System.out.println("Message sent :#########################################################################");
-
-        messageList = client.getMessages(user, userList.get(0));
-
-        for (int index = 0; index < messageList.size(); index++) {
-        System.out.println(messageList.get(index));
-        }
-
-        client.brodcastMessage("Hello", user);
-        client.logOut(user);
-
+        // client.logOut(user);
+        
     //     // Webcam webcam = Webcam.getDefault();
     //     // webcam.open();
     //     // BufferedImage image = webcam.getImage();
@@ -449,5 +429,5 @@ public class SocketClient {
 
     //     // // Close the webcam
     //     // webcam.close();
-    // }
+    }
 }
