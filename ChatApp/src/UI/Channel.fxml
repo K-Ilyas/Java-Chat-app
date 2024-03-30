@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import io.github.palexdev.materialfx.controls.MFXCheckListView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ChannelController">
+   <children>
+      <Label fx:id="friendSelected" layoutX="37.0" layoutY="65.0" prefHeight="16.0" prefWidth="116.0" text="Friend selected" textFill="#9a06aa">
+         <font>
+            <Font name="System Bold" size="11.0" />
+         </font>
+      </Label>
+      <MFXCheckListView fx:id="checklist" layoutX="37.0" layoutY="89.0" prefHeight="262.0" prefWidth="522.0" style="-fx-border-radius: 5;" />
+      <MFXButton fx:id="create" layoutX="488.0" layoutY="361.0" onAction="#Create" prefHeight="33.0" prefWidth="71.0" rippleColor="#bc42d4" style="-fx-background-color: #9a06aa; -fx-border-radius: 5;" text="Create" textFill="#fbf4f4">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </MFXButton>
+      <MFXButton fx:id="cancel" layoutX="404.0" layoutY="362.0" onAction="#Cancel" prefHeight="33.0" prefWidth="71.0" rippleColor="#a50ea8" style="-fx-border-color: gray; -fx-border-radius: 5;" text="Cancel">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </MFXButton>
+      <Label fx:id="newchannel" layoutX="37.0" layoutY="11.0" prefHeight="55.0" prefWidth="522.0" style="-fx-border-color: gray; -fx-border-radius: 5;" text="New channel">
+         <font>
+            <Font name="System Bold" size="23.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
