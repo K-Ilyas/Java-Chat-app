@@ -1,3 +1,4 @@
+package dao;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -11,6 +12,8 @@ import java.util.LinkedList;
 import java.util.UUID;
 
 import org.mindrot.jbcrypt.BCrypt;
+
+import classes.UserInformation;
 
 public class UserDAO extends DAO<UserInformation> {
 
@@ -86,10 +89,10 @@ public class UserDAO extends DAO<UserInformation> {
 
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                ServerLogs.printLog("User deleted successfully.");
+               System.out.println("User deleted successfully.");
                 return true;
             } else {
-                ServerLogs.printLog("Failed to delete user.");
+               System.out.println("Failed to delete user.");
                 return false;
             }
         } catch (SQLException e) {

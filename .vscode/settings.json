@@ -10,7 +10,11 @@
             "javafx-sdk-21.0.2/lib/javafx.media.jar",
             "javafx-sdk-21.0.2/lib/javafx.swing.jar",
             "javafx-sdk-21.0.2/lib/javafx.web.jar",
-            "javafx-sdk-21.0.2/lib/javafx-swt.jar"
+            "javafx-sdk-21.0.2/lib/javafx-swt.jar",
+            "javafx-sdk-21.0.2/lib/bridj-0.7.0.jar",
+            "javafx-sdk-21.0.2/lib/jbcrypt-0.4.jar",
+            "javafx-sdk-21.0.2/lib/slf4j-api-1.7.2.jar",
+            "javafx-sdk-21.0.2/lib/webcam-capture-0.3.12.jar"
         ],
         "exclude": [
             "lib/bcrypt-0.10.2.jar"

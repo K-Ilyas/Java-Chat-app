@@ -1,3 +1,5 @@
+import classes.UserInformation;
+import client.SocketClient;
 
 public class ClientHandler {
     private static UserInformation thisUser;

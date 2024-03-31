@@ -3,9 +3,30 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Video",
+            "name": "Examplle",
             "request": "launch",
-            "mainClass": "Video",
+            "mainClass": "Examplle",
+            "projectName": "Java-Chat-app_b99f03fa"
+        },
+        {
+            "type": "java",
+            "name": "Example",
+            "request": "launch",
+            "mainClass": "Example",
+            "projectName": "Java-Chat-app_b99f03fa"
+        },
+        {
+            "type": "java",
+            "name": "Server",
+            "request": "launch",
+            "mainClass": "server.Server",
+            "projectName": "Java-Chat-app_b99f03fa"
+        },
+        {
+            "type": "java",
+            "name": "SocketClient",
+            "request": "launch",
+            "mainClass": "client.SocketClient",
             "projectName": "Java-Chat-app_b99f03fa"
         },
         {
@@ -18,9 +39,7 @@
                 "${workspaceFolder}/lib/mysql-connector-java-8.0.11.jar:${workspaceFolder}/bin",
                 "*"
             ],
-            "vmArgs": "--module-path \"./javafx-sdk-21.0.2/lib\" --add-modules javafx.controls,javafx.fxml", // Replace <path-to-javafx-lib> with the path to your JavaFX library
-            "cwd": "${workspaceFolder}"
-        },
-        
+            "vmArgs": "--module-path \"./javafx-sdk-21.0.2/lib\" --add-modules javafx.controls,javafx.fxml"
+        }
     ]
 }

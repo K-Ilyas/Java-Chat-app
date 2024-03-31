@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
+import dao.DAO;
+
 public class ConnectedDAO extends DAO<Connected> {
 
   public ConnectedDAO(Connection conn) {

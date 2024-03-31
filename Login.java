@@ -19,6 +19,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Scanner;
+
+import classes.UserInformation;
+import connection.MySQLConnectSingleton;
+import dao.UserDAO;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;

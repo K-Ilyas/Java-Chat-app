@@ -1,5 +1,9 @@
+package client;
 import java.net.Socket;
 import java.util.Scanner;
+
+import classes.UserInformation;
+
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;

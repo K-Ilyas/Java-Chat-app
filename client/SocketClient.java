@@ -1,8 +1,16 @@
+package client;
+
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Scanner;
+
+import classes.API;
+import classes.FriendRequest;
+import classes.MessageTo;
+import classes.UserInformation;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,15 +21,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import classes.UserInformation;
+import classes.MessageTo;
+import classes.FriendRequest;
+
 public class SocketClient {
 
     final static int PORT_CON = 4040;
+    final static int PORT_CON2 = 4041;
+
     private Socket socket = null;
+    private Socket socketMessage = null;
     private Boolean isConnected = false;
     private Scanner scanf = new Scanner(System.in);
     private Boolean isLoged = false;
     private UserInformation userInformation = null;
-    private Thread recive = null;
+    private ReciveNotification recive = null;
     private Thread send = null;
 
     private OutputStream out;
@@ -31,10 +46,11 @@ public class SocketClient {
     private DataOutputStream dos;
     private ObjectOutputStream bos;
     private ObjectInputStream ois;
-    private SendMessage sendMessage = null;
 
     private LinkedList<UserInformation> userList = null;
     private LinkedList<MessageTo> messageList = null;
+    private Hashtable<UserInformation, FriendRequest> listRequests = null;
+    LinkedList<UserInformation> friends = null;
 
     public SocketClient() {
 
@@ -42,6 +58,7 @@ public class SocketClient {
         try {
 
             this.socket = new Socket(InetAddress.getLocalHost(), PORT_CON);
+            this.socketMessage = new Socket(InetAddress.getLocalHost(), PORT_CON2);
             this.isConnected = true;
             out = this.socket.getOutputStream();
             in = this.socket.getInputStream();
@@ -49,7 +66,6 @@ public class SocketClient {
             dos = new DataOutputStream(out);
             bos = new ObjectOutputStream(out);
             ois = new ObjectInputStream(in);
-            sendMessage = new SendMessage(dos, bos, null, null, scanf);
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -74,6 +90,9 @@ public class SocketClient {
             } else {
                 this.userInformation = (UserInformation) ois.readObject();
                 this.isLoged = true;
+                this.recive = new ReciveNotification(this.socketMessage);
+                new Thread(this.recive).start();
+                System.out.println("Recive message thread started");
             }
         } catch (IOException e) {
             API.printMessageClient(e.getMessage());
@@ -101,6 +120,7 @@ public class SocketClient {
                 } else {
                     this.userInformation = (UserInformation) ois.readObject();
                     this.isLoged = true;
+
                 }
             } else
                 API.printMessageClient("Soory you elaready LOG IN");
@@ -113,8 +133,9 @@ public class SocketClient {
     }
 
     public void launchThread() {
-        this.recive = new Thread(new ReciveMessage(this.socket, this.userInformation));
-        this.recive.start();
+        // this.recive = new Thread(new ReciveMessage(this.socket,
+        // this.userInformation));
+        // this.recive.start();
     }
 
     @SuppressWarnings("unchecked")
@@ -149,9 +170,8 @@ public class SocketClient {
         return this.messageList;
     }
 
-    public void sendMessage(String message, UserInformation user, UserInformation friend) {
+    public boolean sendMessage(String message, UserInformation user, UserInformation friend) {
         try {
-            this.sendMessage.setFriend(friend);
             dos.writeInt(5);
             dos.flush();
             dos.writeUTF(message);
@@ -160,12 +180,14 @@ public class SocketClient {
             bos.flush();
             bos.writeObject(user);
             bos.flush();
+            return dis.readBoolean();
         } catch (IOException e) {
             API.printMessageClient(e.getMessage());
         }
+        return false;
     }
 
-    public void brodcastMessage(String message, UserInformation user) {
+    public boolean brodcastMessage(String message, UserInformation user) {
         try {
             dos.writeInt(7);
             dos.flush();
@@ -173,21 +195,167 @@ public class SocketClient {
             dos.flush();
             bos.writeObject(user);
             bos.flush();
+            return dis.readBoolean();
         } catch (IOException e) {
             API.printMessageClient(e.getMessage());
         }
+        return false;
     }
 
-    public void logOut(UserInformation user) {
+    public boolean logOut(UserInformation user) {
         try {
             dos.writeInt(6);
             dos.flush();
             bos.writeObject(user);
             bos.flush();
-            this.isLoged = false;
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                this.isLoged = false;
+                this.recive.setShouldRun(false);
+                return true;
+            } else {
+                System.out.println(dis.readUTF());
+                return false;
+            }
         } catch (IOException e) {
             API.printMessageClient(e.getMessage());
         }
+        return false;
+    }
+
+    public FriendRequest sentInvitation(UserInformation user, UserInformation friend) {
+        try {
+            dos.writeInt(8);
+            dos.flush();
+            bos.writeObject(friend);
+            bos.flush();
+            bos.writeObject(user);
+            bos.flush();
+
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                return (FriendRequest) ois.readObject();
+            } else {
+                System.out.println(dis.readUTF());
+                return null;
+            }
+
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    public FriendRequest acceptInvitation(UserInformation user, FriendRequest friendRequest, String status) {
+        try {
+
+            friendRequest.setRequestStatus(status);
+            dos.writeInt(9);
+            dos.flush();
+            bos.writeObject(friendRequest);
+            bos.flush();
+            bos.writeObject(user);
+            bos.flush();
+
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                friendRequest = (FriendRequest) ois.readObject();
+                return friendRequest;
+            } else {
+                System.out.println(dis.readUTF());
+                return null;
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Hashtable<UserInformation, FriendRequest> getFriendRequest(UserInformation user) {
+        try {
+            dos.writeInt(10);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                this.listRequests = (Hashtable<UserInformation, FriendRequest>) ois.readObject();
+                return this.listRequests;
+            } else
+                System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Hashtable<UserInformation, FriendRequest> getSentFriendReuests(UserInformation user) {
+        try {
+            dos.writeInt(11);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                this.listRequests = (Hashtable<UserInformation, FriendRequest>) ois.readObject();
+                return this.listRequests;
+            } else
+                System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    // list of frineds
+    @SuppressWarnings("unchecked")
+
+    public LinkedList<UserInformation> getFriends(UserInformation user) {
+
+        try {
+            dos.writeInt(12);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                this.friends = (LinkedList<UserInformation>) ois.readObject();
+
+            } else
+                System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return this.userList;
+    }
+
+    // delete friend
+    public boolean deleteFriend(UserInformation user, UserInformation friend) {
+        try {
+            dos.writeInt(13);
+            dos.flush();
+            bos.writeObject(friend);
+            bos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            System.out.println(dis.readUTF());
+            return dis.readBoolean();
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return false;
     }
 
     public void choix() {
@@ -403,31 +571,35 @@ public class SocketClient {
     }
 
     public static void main(String[] args) throws ClassNotFoundException {
+
         SocketClient client = new SocketClient();
         // client.startConversation();
 
-        UserInformation user =null;
+        UserInformation user = null;
 
-
-        user = client.login("Amine", "ahmed");
+        user = client.login("Amine", "Amine");
 
         System.out.println(user.getPseudo() + " - " + user.getUuid());
 
+        LinkedList<UserInformation> userList = client.getUsers();
+
+        client.brodcastMessage("wow", user);
+
         // client.logOut(user);
-        
-    //     // Webcam webcam = Webcam.getDefault();
-    //     // webcam.open();
-    //     // BufferedImage image = webcam.getImage();
+
+        // // Webcam webcam = Webcam.getDefault();
+        // // webcam.open();
+        // // BufferedImage image = webcam.getImage();
 
         // // Save the image (you can customize the filename)
         // File outputFile = new File("webcam_image.jpg");
         // try {
-        //     ImageIO.write(image, "JPG", outputFile);
+        // ImageIO.write(image, "JPG", outputFile);
         // } catch (IOException e) {
-        //     e.printStackTrace();
+        // e.printStackTrace();
         // }
 
-    //     // // Close the webcam
-    //     // webcam.close();
+        // // // Close the webcam
+        // // webcam.close();
     }
 }

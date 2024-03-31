@@ -1,5 +1,8 @@
 
 
+import classes.UserInformation;
+import connection.MySQLConnectSingleton;
+import dao.UserDAO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;

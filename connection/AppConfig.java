@@ -1,9 +1,10 @@
+package connection;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 public class AppConfig {
-    private static final String CONFIG_FILE = "config.properties";
+    private static final String CONFIG_FILE = "./connection/config.properties";
 
     private static Properties properties;
 
