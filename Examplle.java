@@ -36,21 +36,23 @@ public class Examplle {
 
         Hashtable<UserInformation, FriendRequest> friendRequests = client.getSentFriendReuests(user);
 
-
         if (friendRequests == null)
             System.out.println("No friend requests sent");
         else
             for (UserInformation userInformation : friendRequests.keySet()) {
                 System.out.println(userInformation);
             }
+        if (friendRequests != null) {
 
-        // get friend requests 
-        FriendRequest recivedFriendRequest = friendRequests.get(userList.get(0));
+            // get friend requests
+            FriendRequest recivedFriendRequest = friendRequests.get(userList.get(0));
 
-        client.sentInvitation(user, userList.get(0));
+            client.sentInvitation(user, userList.get(0));
 
-        for (UserInformation userInformation : friendRequests.keySet()) {
-            recivedFriendRequest = friendRequests.get(userInformation);
+            for (UserInformation userInformation : friendRequests.keySet()) {
+                recivedFriendRequest = friendRequests.get(userInformation);
+            }
+            client.acceptInvitation(user, recivedFriendRequest, "accepted");
         }
 
         LinkedList<UserInformation> friends = client.getFriends(user);
@@ -59,8 +61,7 @@ public class Examplle {
         for (UserInformation userInformation : friends) {
             System.out.println(userInformation.getPseudo() + " - " + userInformation.getUuid());
         }
-
-        client.acceptInvitation(user,recivedFriendRequest, "accepted");
-
+        
+        client.createRoomWithUsers(user, userList, "jimaa", "");
     }
 }

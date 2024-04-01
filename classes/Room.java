@@ -7,17 +7,21 @@ public class Room implements  Serializable {
   private String uuid_room;
   private String roomname;
   private String image;
+  private String uuid_owner;
+
 
   public Room(){
     this.uuid_room = "";
     this.roomname = "";
     this.image = "";
+    this.uuid_owner = ""; 
   }
 
-  public Room(String uuid_room, String roomname, String image){
+  public Room(String uuid_room, String roomname, String image,String uuid_owner){
     this.uuid_room = uuid_room;
     this.roomname = roomname;
     this.image = image;
+    this.uuid_owner = uuid_owner; 
   }
 
   public String getUuid_room(){
@@ -43,7 +47,13 @@ public class Room implements  Serializable {
   public void setImage(String image){
     this.image = image;
   }
-  
 
+  public String getUuid_owner(){
+    return this.uuid_owner;
+  }
+
+  public void setUuid_owner(String uuid_owner){
+    this.uuid_owner = uuid_owner;
+  }
   
 }

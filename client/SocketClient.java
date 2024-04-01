@@ -10,6 +10,7 @@ import java.util.Scanner;
 import classes.API;
 import classes.FriendRequest;
 import classes.MessageTo;
+import classes.Room;
 import classes.UserInformation;
 
 import java.io.DataInputStream;
@@ -348,6 +349,28 @@ public class SocketClient {
             bos.writeObject(friend);
             bos.flush();
             bos.writeObject(user);
+            bos.flush();
+            System.out.println(dis.readUTF());
+            return dis.readBoolean();
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return false;
+    }
+
+
+    // create a room with a list of users
+    public boolean createRoomWithUsers(UserInformation user, LinkedList<UserInformation> users, String RoomName,String image) {
+        try {
+
+            Room room = new Room("",RoomName, image, user.getUuid());
+            dos.writeInt(14);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            bos.writeObject(room);
+            bos.flush();
+            bos.writeObject(users);
             bos.flush();
             System.out.println(dis.readUTF());
             return dis.readBoolean();

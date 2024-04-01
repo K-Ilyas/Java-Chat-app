@@ -8,8 +8,9 @@ import client.SocketClient;
 public class Example {
 
     public static void main(String[] args) {
+
         SocketClient client = new SocketClient();
-        // client.startConversation();
+        // client.startConversation();z
         UserInformation user = null;
 
         try {

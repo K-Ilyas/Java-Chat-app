@@ -52,6 +52,7 @@ public class ServerClientHandler implements Runnable {
             UserInformation friend = null;
             MessageToDAO message_orm = new MessageToDAO(this.socketServer.getConnect());
             AmisDAO amis_orm = new AmisDAO(this.socketServer.getConnect());
+            RoomDAO room_orm = new RoomDAO(this.socketServer.getConnect());
 
             LinkedList<MessageTo> messages = null;
             LinkedList<Amis> amis = null;
@@ -338,7 +339,6 @@ public class ServerClientHandler implements Runnable {
 
                         System.out.println(friendRequestAccept.getUuidReceiver().equals(userInformation.getUuid()));
 
-
                         if (friendRequestAccept.getUuidReceiver().equals(userInformation.getUuid())
                                 && amis_orm.acceptDclineInvitation(friendRequestAccept)) {
                             dos.writeInt(1);
@@ -347,7 +347,8 @@ public class ServerClientHandler implements Runnable {
                             oos.writeObject(friendRequestAccept);
                             oos.flush();
 
-                            Socket reciver_notification = this.socketServer.findUserSocketMessage(friendRequestAccept.getUuidSender());
+                            Socket reciver_notification = this.socketServer
+                                    .findUserSocketMessage(friendRequestAccept.getUuidSender());
 
                             if (reciver_notification != null) {
                                 try {
@@ -440,6 +441,23 @@ public class ServerClientHandler implements Runnable {
                             dos.writeBoolean(true);
                             dos.flush();
 
+                        } else {
+                            dos.writeUTF("SERVER : SOMETHING WENT WRONG PLEASE RETRY");
+                            dos.writeBoolean(false);
+                            dos.flush();
+                        }
+                        break;
+                    case 14:
+
+                        // create a room with users in it and with admin
+                        UserInformation admin = (UserInformation) ois.readObject();
+                        Room room = (Room) ois.readObject();
+                        @SuppressWarnings("unchecked")
+                        LinkedList<UserInformation> users = (LinkedList<UserInformation>) ois.readObject();
+                        if (room_orm.createRoomWithUsers(room,admin, users)) {
+                            dos.writeUTF("SERVER : YOUR ROOM HAS BEEN CREATED SUCCESFULLY");
+                            dos.writeBoolean(true);
+                            dos.flush();
                         } else {
                             dos.writeUTF("SERVER : SOMETHING WENT WRONG PLEASE RETRY");
                             dos.writeBoolean(false);
