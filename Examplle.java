@@ -1,7 +1,9 @@
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Map;
 
 import classes.FriendRequest;
+import classes.Room;
 import classes.UserInformation;
 import client.SocketClient;
 
@@ -61,7 +63,29 @@ public class Examplle {
         for (UserInformation userInformation : friends) {
             System.out.println(userInformation.getPseudo() + " - " + userInformation.getUuid());
         }
-        
+
         client.createRoomWithUsers(user, userList, "jimaa", "");
+
+        Map<Room, Map<UserInformation, LinkedList<UserInformation>>> rooms = client.getRoomsWithUsers(user);
+
+        if (rooms == null)
+            System.out.println("No rooms");
+        else
+            for (Room room : rooms.keySet()) {
+
+                System.out.println(room.getRoomname());
+
+                Map<UserInformation, LinkedList<UserInformation>> users = rooms.get(room);
+
+                for (UserInformation userInformation : users.keySet()) {
+                    System.out.println(userInformation.getPseudo());
+                    LinkedList<UserInformation> usersInRoom = users.get(userInformation);
+                    for (UserInformation userInformation2 : usersInRoom) {
+                        System.out.println(userInformation2.getPseudo());
+                    }
+                }
+
+            }
+
     }
 }

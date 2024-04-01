@@ -15,6 +15,7 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -452,9 +453,8 @@ public class ServerClientHandler implements Runnable {
                         // create a room with users in it and with admin
                         UserInformation admin = (UserInformation) ois.readObject();
                         Room room = (Room) ois.readObject();
-                        @SuppressWarnings("unchecked")
                         LinkedList<UserInformation> users = (LinkedList<UserInformation>) ois.readObject();
-                        if (room_orm.createRoomWithUsers(room,admin, users)) {
+                        if (room_orm.createRoomWithUsers(room, admin, users)) {
                             dos.writeUTF("SERVER : YOUR ROOM HAS BEEN CREATED SUCCESFULLY");
                             dos.writeBoolean(true);
                             dos.flush();
@@ -464,6 +464,22 @@ public class ServerClientHandler implements Runnable {
                             dos.flush();
                         }
                         break;
+
+                    case 15:
+                        // get all rooms with users
+                        Map<Room, Map<UserInformation, LinkedList<UserInformation>>> list = room_orm.getRoomsAndUsers();
+
+                        if (list.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE ROOMS");
+                            dos.flush();
+                            oos.writeObject(list);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO ROOMS");
+                            dos.flush();
+                        }
 
                     default:
                         System.out.println("You have an error in your cmmande please retrait");

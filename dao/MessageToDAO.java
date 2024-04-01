@@ -21,11 +21,9 @@ public class MessageToDAO extends DAO<MessageTo> {
         try {
 
             String query = "INSERT INTO messageto (uuid_sender, uuid_reciver, message, message_date, isdelated ) VALUES ( ?, ?, ?, ?, ?)";
-
             statement = this.connect.prepareStatement(query);
-
             System.out.println("uuid_sender: " + obj.getUuid_sender() + " uuid_reciver: " + obj.getUuid_reciver());
-
+            
             statement.setString(1, obj.getUuid_sender());
             statement.setString(2, obj.getUuid_reciver());
             statement.setString(3, obj.getMessage());

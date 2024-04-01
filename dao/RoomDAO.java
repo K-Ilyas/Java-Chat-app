@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Map;
 
 import classes.Room;
 import classes.UserInformation;
@@ -50,33 +53,37 @@ public class RoomDAO extends DAO<Room> {
     String uuid = java.util.UUID.randomUUID().toString();
 
     try {
-      String query = "INSERT INTO room (uuid_room,roomname,image,uuid_owner) VALUES (?,?,?,?)";
-      statement = this.connect.prepareStatement(query);
-      statement.setString(1, uuid);
-      statement.setString(2, obj.getRoomname());
-      statement.setString(3, obj.getImage());
-      statement.setString(4, obj.getUuid_owner());
-      statement.executeUpdate();
-      // get the uuid of the room
+      if (!this.roomExists(obj.getRoomname())) {
+        String query = "INSERT INTO room (uuid_room,roomname,image,uuid_owner) VALUES (?,?,?,?)";
+        statement = this.connect.prepareStatement(query);
+        statement.setString(1, uuid);
+        statement.setString(2, obj.getRoomname());
+        statement.setString(3, obj.getImage());
+        statement.setString(4, obj.getUuid_owner());
+        statement.executeUpdate();
+        // get the uuid of the room
 
-      // add all users to the room
+        // add all users to the room
 
-      for (UserInformation user : users) {
-        if (!user.getUuid().equals(admin.getUuid())) {
-          query = "INSERT INTO connected (uuid_user,uuid_room) VALUES (?,?)";
-          statement = this.connect.prepareStatement(query);
-          statement.setString(1, user.getUuid());
-          statement.setString(2, uuid);
-          statement.executeUpdate();
+        for (UserInformation user : users) {
+          if (!user.getUuid().equals(admin.getUuid())) {
+            query = "INSERT INTO connected (uuid_user,uuid_room) VALUES (?,?)";
+            statement = this.connect.prepareStatement(query);
+            statement.setString(1, user.getUuid());
+            statement.setString(2, uuid);
+            statement.executeUpdate();
+          }
         }
+
+        query = "INSERT INTO connected (uuid_user,uuid_room) VALUES (?,?)";
+        statement = this.connect.prepareStatement(query);
+        statement.setString(1, admin.getUuid());
+        statement.setString(2, uuid);
+        statement.executeUpdate();
+        return true;
+      } else {
+        return false;
       }
-
-      query = "INSERT INTO connected (uuid_user,uuid_room) VALUES (?,?)";
-      statement = this.connect.prepareStatement(query);
-      statement.setString(1, admin.getUuid());
-      statement.setString(2, uuid);
-      statement.executeUpdate();
-
     } catch (SQLException e) {
       e.printStackTrace();
       return false;
@@ -90,7 +97,59 @@ public class RoomDAO extends DAO<Room> {
       }
 
     }
-    return true;
+  }
+
+  public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsAndUsers() {
+    Map<Room, Map<UserInformation, LinkedList<UserInformation>>> roomsAndUsers = new HashMap<>();
+    String roomQuery = "SELECT * FROM room";
+    try (PreparedStatement roomStatement = connect.prepareStatement(roomQuery);
+        ResultSet roomResultSet = roomStatement.executeQuery()) {
+      while (roomResultSet.next()) {
+        Room room = new Room(
+            roomResultSet.getString("uuid_room"),
+            roomResultSet.getString("roomname"),
+            roomResultSet.getString("image"),
+            roomResultSet.getString("uuid_owner"));
+
+        String ownerQuery = "SELECT * FROM user WHERE uuid_user = ?";
+        try (PreparedStatement ownerStatement = connect.prepareStatement(ownerQuery)) {
+          ownerStatement.setString(1, room.getUuid_owner());
+          ResultSet ownerResultSet = ownerStatement.executeQuery();
+          if (ownerResultSet.next()) {
+            UserInformation owner = new UserInformation(
+                ownerResultSet.getString("uuid_user"),
+                ownerResultSet.getString("username"),
+                "",
+                ownerResultSet.getString("email"),
+                ownerResultSet.getString("image"),
+                ownerResultSet.getBoolean("isadmin"));
+
+            LinkedList<UserInformation> users = new LinkedList<>();
+            String connectedUsersQuery = "SELECT * FROM connected INNER JOIN user ON user.uuid_user = connected.uuid_user WHERE uuid_room = ?";
+            try (PreparedStatement connectedUsersStatement = connect.prepareStatement(connectedUsersQuery)) {
+              connectedUsersStatement.setString(1, room.getUuid_room());
+              ResultSet connectedUsersResultSet = connectedUsersStatement.executeQuery();
+              while (connectedUsersResultSet.next()) {
+                UserInformation connectedUser = new UserInformation(
+                    connectedUsersResultSet.getString("uuid_user"),
+                    connectedUsersResultSet.getString("username"),
+                    "",
+                    connectedUsersResultSet.getString("email"),
+                    connectedUsersResultSet.getString("image"),
+                    connectedUsersResultSet.getBoolean("isadmin"));
+                users.add(connectedUser);
+              }
+            }
+            Map<UserInformation, LinkedList<UserInformation>> usersMap = new HashMap<>();
+            usersMap.put(owner, users);
+            roomsAndUsers.put(room, usersMap);
+          }
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return roomsAndUsers;
   }
 
   @Override
@@ -190,7 +249,8 @@ public class RoomDAO extends DAO<Room> {
       // seule.
       ResultSet result = this.connect.createStatement(
           ResultSet.TYPE_SCROLL_INSENSITIVE,
-          ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM room WHERE uuid_room = " + uuid_room);
+          ResultSet.CONCUR_READ_ONLY)
+          .executeQuery(String.format("SELECT * FROM room WHERE uuid_room = '%s'", uuid_room));
       // Cette ligne vérifie si le ResultSet contient au moins une ligne de résultat.
       if (result.first())
         return true;

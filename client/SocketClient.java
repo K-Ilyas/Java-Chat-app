@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Scanner;
 
 import classes.API;
@@ -259,7 +260,7 @@ public class SocketClient {
             bos.flush();
             bos.writeObject(user);
             bos.flush();
-            
+
             if (dis.readInt() == 1) {
                 System.out.println(dis.readUTF());
                 friendRequest = (FriendRequest) ois.readObject();
@@ -338,7 +339,7 @@ public class SocketClient {
         } catch (ClassNotFoundException e) {
             API.printMessageClient(e.getMessage());
         }
-        return  this.friends;
+        return this.friends;
     }
 
     // delete friend
@@ -358,12 +359,12 @@ public class SocketClient {
         return false;
     }
 
-
     // create a room with a list of users
-    public boolean createRoomWithUsers(UserInformation user, LinkedList<UserInformation> users, String RoomName,String image) {
+    public boolean createRoomWithUsers(UserInformation user, LinkedList<UserInformation> users, String RoomName,
+            String image) {
         try {
 
-            Room room = new Room("",RoomName, image, user.getUuid());
+            Room room = new Room("", RoomName, image, user.getUuid());
             dos.writeInt(14);
             dos.flush();
             bos.writeObject(user);
@@ -378,6 +379,32 @@ public class SocketClient {
             API.printMessageClient(e.getMessage());
         }
         return false;
+    }
+
+    // get list of rooms and users
+    @SuppressWarnings("unchecked")
+    public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsWithUsers(UserInformation user) {
+        try {
+
+            if (this.isLoged == false && !user.getUuid().equals(""))
+                return null;
+            else {
+                dos.writeInt(15);
+                dos.flush();
+                bos.writeObject(user);
+                bos.flush();
+                if (dis.readInt() == 1) {
+                    System.out.println(dis.readUTF());
+                    return (Map<Room, Map<UserInformation, LinkedList<UserInformation>>>) ois.readObject();
+                } else
+                    System.out.println(dis.readUTF());
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
     }
 
     public void choix() {
