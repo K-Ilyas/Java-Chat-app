@@ -1,5 +1,7 @@
+import java.util.Hashtable;
 import java.util.LinkedList;
 
+import classes.FriendRequest;
 import classes.UserInformation;
 import client.SocketClient;
 
@@ -32,6 +34,33 @@ public class Examplle {
 
         client.brodcastMessage("OK thanks", user);
 
-        client.logOut(user);
+        Hashtable<UserInformation, FriendRequest> friendRequests = client.getSentFriendReuests(user);
+
+
+        if (friendRequests == null)
+            System.out.println("No friend requests sent");
+        else
+            for (UserInformation userInformation : friendRequests.keySet()) {
+                System.out.println(userInformation);
+            }
+
+        // get friend requests 
+        FriendRequest recivedFriendRequest = friendRequests.get(userList.get(0));
+
+        client.sentInvitation(user, userList.get(0));
+
+        for (UserInformation userInformation : friendRequests.keySet()) {
+            recivedFriendRequest = friendRequests.get(userInformation);
+        }
+
+        LinkedList<UserInformation> friends = client.getFriends(user);
+        System.out.println("Friends : ");
+
+        for (UserInformation userInformation : friends) {
+            System.out.println(userInformation.getPseudo() + " - " + userInformation.getUuid());
+        }
+
+        client.acceptInvitation(user,recivedFriendRequest, "accepted");
+
     }
 }

@@ -1,5 +1,8 @@
 package classes;
-public class FriendRequest {
+
+import java.io.Serializable;
+
+public class FriendRequest implements Serializable {
     private String uuidSender;
     private String uuidReceiver;
     private String requestStatus;

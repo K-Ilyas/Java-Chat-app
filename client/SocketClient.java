@@ -258,7 +258,7 @@ public class SocketClient {
             bos.flush();
             bos.writeObject(user);
             bos.flush();
-
+            
             if (dis.readInt() == 1) {
                 System.out.println(dis.readUTF());
                 friendRequest = (FriendRequest) ois.readObject();
@@ -276,7 +276,7 @@ public class SocketClient {
     }
 
     @SuppressWarnings("unchecked")
-    public Hashtable<UserInformation, FriendRequest> getFriendRequest(UserInformation user) {
+    public Hashtable<UserInformation, FriendRequest> getFriendRequests(UserInformation user) {
         try {
             dos.writeInt(10);
             dos.flush();
@@ -319,7 +319,6 @@ public class SocketClient {
 
     // list of frineds
     @SuppressWarnings("unchecked")
-
     public LinkedList<UserInformation> getFriends(UserInformation user) {
 
         try {
@@ -338,7 +337,7 @@ public class SocketClient {
         } catch (ClassNotFoundException e) {
             API.printMessageClient(e.getMessage());
         }
-        return this.userList;
+        return  this.friends;
     }
 
     // delete friend

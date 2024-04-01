@@ -304,10 +304,10 @@ public class ServerClientHandler implements Runnable {
                             oos.writeObject(friendRequest);
                             oos.flush();
 
-                            if (this.socketServer.findUserSocketMessage(friend.getUuid()) != null) {
+                            Socket reciver_notification = this.socketServer.findUserSocketMessage(friend.getUuid());
+                            if (reciver_notification != null) {
                                 try {
-                                    OutputStream outRecive = this.socketServer.findUserSocket(friend.getUuid())
-                                            .getOutputStream();
+                                    OutputStream outRecive = reciver_notification.getOutputStream();
                                     DataOutputStream dosRecive = new DataOutputStream(outRecive);
                                     ObjectOutputStream oosRecive = new ObjectOutputStream(outRecive);
 
@@ -336,17 +336,22 @@ public class ServerClientHandler implements Runnable {
                         FriendRequest friendRequestAccept = (FriendRequest) ois.readObject();
                         userInformation = (UserInformation) ois.readObject();
 
-                        if (amis_orm.acceptDclineInvitation(friendRequestAccept)) {
+                        System.out.println(friendRequestAccept.getUuidReceiver().equals(userInformation.getUuid()));
+
+
+                        if (friendRequestAccept.getUuidReceiver().equals(userInformation.getUuid())
+                                && amis_orm.acceptDclineInvitation(friendRequestAccept)) {
                             dos.writeInt(1);
                             dos.writeUTF("SERVER : YOUR INVITATION HAS BEEN ACCEPTED SUCCESFULLY");
                             dos.flush();
                             oos.writeObject(friendRequestAccept);
                             oos.flush();
 
-                            if (this.socketServer.findUserSocketMessage(friendRequestAccept.getUuidSender()) != null) {
+                            Socket reciver_notification = this.socketServer.findUserSocketMessage(friendRequestAccept.getUuidSender());
+
+                            if (reciver_notification != null) {
                                 try {
-                                    OutputStream outRecive = this.socketServer
-                                            .findUserSocket(friendRequestAccept.getUuidSender()).getOutputStream();
+                                    OutputStream outRecive = reciver_notification.getOutputStream();
                                     DataOutputStream dosRecive = new DataOutputStream(outRecive);
                                     ObjectOutputStream oosRecive = new ObjectOutputStream(outRecive);
 

@@ -52,9 +52,8 @@ public class ReciveNotification implements Runnable {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
     }
-
+    
     public void setShouldRun(boolean shouldRun) {
         synchronized (this) {
             this.shouldRun = shouldRun;
