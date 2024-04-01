@@ -2,53 +2,52 @@ package Controller;
 
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import DAO.UserInformation;
-import Socket.ClientHandler;
-import UI.ResourceLoader;
-import bubble.BubbleSpec;
-import bubble.BubbledLabel;
+import Client.ClientHandler;
+import Events.NotificationEvent;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXListView;
+import io.github.palexdev.materialfx.controls.MFXScrollPane;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import io.github.palexdev.materialfx.controls.cell.MFXListCell;
 import io.github.palexdev.materialfx.utils.others.FunctionalStringConverter;
 import io.github.palexdev.mfxresources.fonts.MFXFontIcon;
+import io.github.palexdev.virtualizedfx.enums.ScrollPaneEnums.ScrollBarPolicy;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.ListCell;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import model.MessageTo;
+import model.UserInformation;
+import bubble.*;
 
 public class MessagesContoller implements Initializable
 {
-    private UserInformation friend;
+    
 
     @FXML 
-    private MFXListView<HBox> chatPane;
+    private VBox chatPane;
+
+    @FXML 
+    private GridPane rootPane;
 
     @FXML
     private MFXListView<UserInformation> userList;
@@ -62,13 +61,66 @@ public class MessagesContoller implements Initializable
     @FXML 
     private MFXButton send;
 
+
+    @FXML 
+    private MFXScrollPane messageScroller;
+
+    @FXML 
+    private MFXTextField searchUserTF;
+
+
+    private static ObservableList<Node> speechBubbles = FXCollections.observableArrayList();
+
+    private static UserInformation selectedUser;
+
+    private Stage stage;
+
+    MessagesContoller(Stage stage){
+        this.stage = stage;
+    }
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        HBox bottomBar = new HBox();
-        bottomBar.setSpacing(0);
-        bottomBar.setAlignment(Pos.BOTTOM_LEFT);
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(0, 0, 10, 0));
+
+
+        // Set the policy of the vertical scrollbar to always display
+        // messageScroller.setVbarPolicy(MFXScrollPane.ScrollBarPolicy.ALWAYS);
+
+
+        // Bind the height of the content to the height of the viewport
+        // chatPane.prefHeightProperty().bind(messageScroller.heightProperty());
+
+        Bindings.bindContentBidirectional(speechBubbles, chatPane.getChildren());
+        speechBubbles.addListener((ListChangeListener<Node>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    // Scroll to the bottom
+                    messageScroller.setVvalue(1.0);
+                }
+            }
+        });
+
+        // // Listen for custom events
+        // Platform.runLater(() -> {
+        //     Scene scene = rootPane.getScene();
+        //     if (scene != null) {
+        //         scene.addEventHandler(NotificationEvent.NOTIFICATION_EVENT_TYPE, new EventHandler<NotificationEvent>() {
+        //             @Override
+        //             public void handle(NotificationEvent event) {
+        //                 UserInformation sender = event.getSender();
+        //                 MessageTo message = event.getMessage();
+        //                 setNotification(sender, message);
+        //             }
+        //         });
+        //     } else {
+        //         System.err.println("Scene is null. Unable to add event handler.");
+        //     }
+        // });
+
+        ClientHandler.getClientSocket().getRecive().setMessagesContoller(this);
+        Thread Notifications = new Thread(ClientHandler.getClientSocket().getRecive());
+        
+        Notifications.start();
 
         MFXFontIcon wrapper = new MFXFontIcon("fas-sliders", 24);
         MFXButton sendButton = new MFXButton();
@@ -76,9 +128,10 @@ public class MessagesContoller implements Initializable
 
         // actions.getChildren().add(actions);
 
+
         // [API] get the user from the ClientHandler API
-        LinkedList<UserInformation> contactsListT = new LinkedList<>();
-        contactsListT.add(new UserInformation("ahmed", "woow")); 
+        LinkedList<UserInformation> contactsListT = ClientHandler.getClientSocket().getUsers();
+
         // https://examples.javacodegeeks.com/java-development/desktop-java/javafx/listview-javafx/javafx-listview-example/
 
         ObservableList<UserInformation> users = FXCollections.<UserInformation>observableArrayList(contactsListT);
@@ -91,43 +144,41 @@ public class MessagesContoller implements Initializable
         userList.features().enableBounceEffect();
         userList.features().enableSmoothScrolling(0.5);
         
-        // [API] here goes the old messages
-        chatPane.getItems().add(BuildMsg(new MessageTo("123","1234322","Hello from the ", "12/12/12", false), Color.LIGHTBLUE));
-        chatPane.getItems().add(BuildMsg(new MessageTo("123","1234322","Hello from the ", "12/12/12", false) , Color.LIGHTGREEN));
-        chatPane.getItems().add(BuildMsg(new MessageTo("123","1234322","Hello from the ", "12/12/12", false) , Color.LIGHTBLUE));
-        chatPane.getItems().add(BuildMsg(new MessageTo("123","1234322","Hello from the ", "12/12/12", false) , Color.LIGHTGREEN));
-        chatPane.getItems().add(BuildMsg(new MessageTo("123","1234322","Hello from the ", "12/12/12", false) , Color.LIGHTBLUE));
 
-         ObjectProperty<UserInformation> selectedUserProperty = new SimpleObjectProperty<>();
-        ObjectProperty<MessageTo> selectedMessageProperty = new SimpleObjectProperty<>();
+        // [Feature] add the right first page 
 
-        userList.setCellFactory(lv -> new MFXListCell<UserInformation>(userList, lv) {
-            @Override
-            protected void updateItem(UserInformation user, boolean empty) {
-                updateItem(user, empty);
-                if (empty || user == null) {
-                    setText(null);
-                } else {
-                    setText(user.getPseudo());
-                    setStyle("-fx-background-color: #f0f2f5; -fx-padding: 5;");
-                    setOnMouseClicked(event -> {
-                        selectedUserProperty.set(user);
-                        friend = user;
-                        List<MessageTo> messages = new ArrayList<>();
-                        messages.add(new MessageTo("123","1234322","Hello from the ", "12/12/12", false));
-                        messages.add(new MessageTo("123","1234322","Hello from thfdsfe fs", "12/12/16", false));
-                        messages.add(new MessageTo("123","1234322","Hello from thdfsfdsfe ", "12/12/17", false));
-                        messages.add(new MessageTo("123","1234322","Hello from the gfdgfgd", "12/12/18", false));
-                        // messageCount.setText("Message Count: " + messages.size());
-                        messages.sort(Comparator.comparing(MessageTo::getMessage_date));
-                        chatPane;
-                        for(MessageTo message : messages)
-                            chatPane.getItems().add(BuildMsg(message, Color.LIGHTBLUE));
-                        
-                    });
-                }
+
+    FilteredList<UserInformation> filteredData = ListConverter.convertToFilteredList(users);
+
+    //Set the filter Predicate whenever the filter changes.
+    searchUserTF.textProperty().addListener((observable, oldValue, newValue) -> {
+        filteredData.setPredicate(client ->{
+            // If filter text is empty, display all persons.
+            if(newValue == null || newValue.isEmpty()){
+                return true;
             }
+
+            // Compare first name and last name of every client with filter text.
+            String lowerCaseFilter = newValue.toLowerCase();
+
+            if(client.getPseudo().toLowerCase().contains(lowerCaseFilter)){
+                return true; //filter matches first name
+            }
+            return false; //Does not match
         });
+    });
+
+    
+    SortedList<UserInformation> sortedData = new SortedList<>(filteredData);
+
+
+    userList.setItems(sortedData);
+
+
+
+
+
+
 
         
     }
@@ -137,7 +188,7 @@ public class MessagesContoller implements Initializable
         String msg = messageInput.getText();
         if (messageInput != null && !messageInput.getText().isEmpty()) {
             // [API] here goes the send the send Function from ClientHandler
-            addToChat(new MessageTo("123", "1234322", msg, "12/12/12", false));
+            ClientHandler.getClientSocket().sendMessage(msg, ClientHandler.getLoggedInUser(), selectedUser);
             messageInput.clear();
         }
     }
@@ -162,77 +213,38 @@ public class MessagesContoller implements Initializable
     }
 
 
+  
 
-    public synchronized void addToChat(MessageTo msg) {
 
-        Task<HBox> othersMessages = new Task<HBox>() {
-            @Override
-            public HBox call() throws Exception {
-                Image image = new Image(ResourceLoader.load("Images/logo.png").toString());
-                ImageView profileImage = new ImageView(image);
-                profileImage.setFitHeight(32);
-                profileImage.setFitWidth(32);
-                BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getUuid_sender() + ": " + msg.getMessage());
-                bl6.setBackground(new Background(new BackgroundFill(Color.rgb(96, 28, 190), CornerRadii.EMPTY, Insets.EMPTY)));  
-                HBox x = new HBox();
-                bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
-                x.getChildren().addAll(profileImage, bl6);
-                return x;
-            }
-        };
 
-        othersMessages.setOnSucceeded(event -> {
-            chatPane.getItems().add(othersMessages.getValue());
-        });
+    private void updateChatPane(UserInformation selectedUser) {
+        chatPane.getChildren().clear();
+        MessagesContoller.selectedUser = selectedUser;
+        LinkedList<MessageTo> messages = ClientHandler.getClientSocket().getMessages(ClientHandler.getLoggedInUser(), selectedUser);
 
-        Task<HBox> yourMessages = new Task<HBox>() {
-            @Override
-            public HBox call() throws Exception {
-                Image image = new Image(ResourceLoader.load("Images/logo.png").toString());
-                ImageView profileImage = new ImageView(image);
-                profileImage.setFitHeight(32);
-                profileImage.setFitWidth(32);
-
-                BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getMessage());
-                
-                bl6.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN,
-                        null, null)));
-
-                HBox x = new HBox();
-                x.setMaxWidth(chatPane.getWidth() - 20);
-                x.setAlignment(Pos.TOP_RIGHT);
-                bl6.setBubbleSpec(BubbleSpec.FACE_RIGHT_CENTER);
-                x.getChildren().addAll(bl6, profileImage);
-
-                return x;
-            }
-        };
-        yourMessages.setOnSucceeded(event -> chatPane.getItems().add(yourMessages.getValue()));
-
-        if (msg.getUuid_sender().equals("1235255455")) {
-            Thread t2 = new Thread(yourMessages);
-            t2.setDaemon(true);
-            t2.start();
-        } else {
-            Thread t = new Thread(othersMessages);
-            t.setDaemon(true);
-            t.start();
+        for (MessageTo message : messages){
+            if (message.getUuid_sender().equals(MessagesContoller.selectedUser.getUuid()))
+                speechBubbles.add(new SpeechBox(message, "LEFT"));
+            speechBubbles.add(new SpeechBox(message, "RIGHT"));        
         }
     }
 
-    public HBox BuildMsg(MessageTo msg, Color cl){
-        Image image = new Image(ResourceLoader.load("Images/logo.png").toString());
-        ImageView profileImage = new ImageView(image);
-        profileImage.setFitHeight(32);
-        profileImage.setFitWidth(32);
-        BubbledLabel bl6 = new BubbledLabel();
-        bl6.setText(msg.getUuid_sender() + ": " + msg.getMessage());
-        bl6.setBackground(new Background(new BackgroundFill(cl, CornerRadii.EMPTY, Insets.EMPTY)));  
-        HBox x = new HBox();
-        bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
-        x.getChildren().addAll(profileImage, bl6);
-        return x;
+@FXML
+private void handleUserClick(MouseEvent event) {
+    UserInformation selectedUser = (UserInformation) userList.getSelectionModel().getSelectedValues().get(0);
+    if (selectedUser != null) {
+        updateChatPane(selectedUser);
     }
 }
+
+
+  public void setNotification(UserInformation sender, MessageTo msg){
+    Platform.runLater(() -> {
+        if (sender.getUuid().equals(selectedUser.getUuid()))
+            speechBubbles.add(new SpeechBox(msg, "RIGHT"));
+        else speechBubbles.add(new SpeechBox(msg, "LEFT"));
+    });
+ }
+}
+
+

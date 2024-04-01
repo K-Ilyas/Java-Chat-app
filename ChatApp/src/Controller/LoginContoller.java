@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import DAO.UserInformation;
-import Socket.ClientHandler;
+import Client.ClientHandler;
+import UI.ResourceLoader;
+import fr.brouillard.oss.cssfx.CSSFX;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
+import io.github.palexdev.materialfx.css.themes.MFXThemeManager;
+import io.github.palexdev.materialfx.css.themes.Themes;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,7 +21,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import model.UserInformation;
 import javafx.scene.Node;
 
 public class LoginContoller extends Application {
@@ -42,8 +48,11 @@ public class LoginContoller extends Application {
   @FXML
   private Label warning;
 
-  @FXML
+  public LoginContoller(Stage stage){
+    this.stage =  stage;
+  }
 
+  @FXML
   public void Login(ActionEvent event) throws IOException {
     ClientHandler.initSocker();
     String usernameUser = username.getText();
@@ -54,11 +63,18 @@ public class LoginContoller extends Application {
       return;
     } else if (user != null) {
       ClientHandler.setLoggedInUser(user);
-      Parent root = FXMLLoader.load(getClass().getResource(".././UI/chat.fxml"));
-      stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-      scene = new Scene(root);
-      stage.setScene(scene);
-      stage.show();
+      CSSFX.start();
+      Stage newStage = new Stage(); // Create a new stage
+      FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("Main.fxml"));
+      loader.setControllerFactory(c -> new MainContoller(newStage)); 
+      Parent root = loader.load();
+      Scene scene = new Scene(root);
+      MFXThemeManager.addOn(scene, Themes.DEFAULT, Themes.LEGACY);
+      scene.setFill(Color.TRANSPARENT);
+      newStage.initStyle(StageStyle.TRANSPARENT);
+      newStage.setScene(scene);
+      newStage.setTitle("ChatApp");
+      newStage.show();
     } else {
       warning.setText("Invalid username or password");
       return;

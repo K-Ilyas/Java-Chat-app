@@ -1,11 +1,12 @@
 package DAO;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.UUID;
+
+import model.MessageTo;
 
 public class MessageToDAO extends DAO<MessageTo> {
 
@@ -18,11 +19,11 @@ public class MessageToDAO extends DAO<MessageTo> {
         PreparedStatement statement = null;
         String uuid = UUID.randomUUID().toString();
         try {
-            
+
             String query = "INSERT INTO messageto (uuid_sender, uuid_reciver, message, message_date, isdelated ) VALUES ( ?, ?, ?, ?, ?)";
 
             statement = this.connect.prepareStatement(query);
-            
+
             System.out.println("uuid_sender: " + obj.getUuid_sender() + " uuid_reciver: " + obj.getUuid_reciver());
 
             statement.setString(1, obj.getUuid_sender());
@@ -42,6 +43,15 @@ public class MessageToDAO extends DAO<MessageTo> {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    public boolean createAll(LinkedList<MessageTo> messages) {
+        for (MessageTo message : messages) {
+            if (!this.create(message)) {
+                return false;
             }
         }
         return true;
@@ -91,7 +101,7 @@ public class MessageToDAO extends DAO<MessageTo> {
     }
 
     public LinkedList<MessageTo> findAll(String uuid_sender, String uuid_reciver) {
-        
+
         System.out.println("uuid_sender: " + uuid_sender + " uuid_reciver: " + uuid_reciver);
 
         LinkedList<MessageTo> messages = new LinkedList<MessageTo>();

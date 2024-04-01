@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Server",
+      "request": "launch",
+      "mainClass": "Server.Server",
+      "projectName": "ChatApp_670f658d"
+    },
+    {
+      "type": "java",
       "name": "SocketServer",
       "request": "launch",
       "mainClass": "Socket.SocketServer",

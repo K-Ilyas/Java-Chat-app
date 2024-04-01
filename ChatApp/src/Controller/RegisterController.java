@@ -3,16 +3,17 @@ package Controller;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-
-import DAO.UserDAO;
-import DAO.UserInformation;
-import DbSingleton.MySQLConnectSingleton;
-import Socket.ClientHandler;
+import Client.ClientHandler;
+import UI.ResourceLoader;
+import connection.MySQLConnectSingleton;
+import fr.brouillard.oss.cssfx.CSSFX;
 import javafx.scene.Node;
 
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
+import io.github.palexdev.materialfx.css.themes.MFXThemeManager;
+import io.github.palexdev.materialfx.css.themes.Themes;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,7 +24,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import model.UserInformation;
 
 public class RegisterController extends Application implements Initializable {
 
@@ -51,7 +55,7 @@ public class RegisterController extends Application implements Initializable {
 
   @FXML
   private Label warnning;
-  UserDAO user_dao = new UserDAO(MySQLConnectSingleton.getInstance());
+  
   UserInformation userInformation = null;
 
   @FXML
@@ -72,11 +76,18 @@ public class RegisterController extends Application implements Initializable {
       ClientHandler.setLoggedInUser(userInformation);
 
       if (userInformation.getUuid() != "") {
-        Parent root = FXMLLoader.load(getClass().getResource(".././UI/Login.fxml"));
-        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+        CSSFX.start();
+        Stage newStage = new Stage(); 
+        FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("Main.fxml"));
+        loader.setControllerFactory(c -> new MainContoller(newStage)); 
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        MFXThemeManager.addOn(scene, Themes.DEFAULT, Themes.LEGACY);
+        scene.setFill(Color.TRANSPARENT);
+        newStage.initStyle(StageStyle.TRANSPARENT);
+        newStage.setScene(scene);
+        newStage.setTitle("ChatApp");
+        newStage.show();
       } else {
         warnning.setText("User already exists");
       }
