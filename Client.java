@@ -30,7 +30,7 @@ import javax.sound.sampled.TargetDataLine;
 import javax.swing.ImageIcon;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
+
 
 public class Client extends Application {
 
@@ -126,7 +126,7 @@ public class Client extends Application {
 
                 double widthScaleFactor = primaryStage.getWidth() / screenImage.getWidth();
                 double heightScaleFactor = primaryStage.getHeight() / screenImage.getHeight();
-                double scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
+                double scaleFactor =  heightScaleFactor < widthScaleFactor ? heightScaleFactor : widthScaleFactor;
 
                 // Scale down the screen image if necessary
                 if (scaleFactor < 1.0) {

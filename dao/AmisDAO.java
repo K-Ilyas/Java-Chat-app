@@ -246,6 +246,45 @@ public class AmisDAO extends DAO<Amis> {
     }
     return requests;
   }
+  
+  // get list of users that are not friend and haven't sent a friend request to it
+  public LinkedList<UserInformation> notFrinedsAndNotSentRequest(UserInformation user) {
+    LinkedList<UserInformation> notFriends = new LinkedList<UserInformation>();
+    PreparedStatement statement = null;
+    ResultSet result = null;
+    try {
+      String query = "SELECT * FROM user WHERE uuid_user not in (SELECT amis.uuid_first_user FROM user inner join amis on user.uuid_user = amis.uuid_second_user where  user.uuid_user = ? UNION SELECT amis.uuid_second_user FROM user inner join amis  on user.uuid_user = amis.uuid_first_user  where user.uuid_user = ? ) and uuid_user != ? and uuid_user not in (SELECT uuid_reciver FROM friend_request where uuid_sender = ? and request_status = 'pending')";
+      statement = this.connect.prepareStatement(query);
+      statement.setString(1, user.getUuid());
+      statement.setString(2, user.getUuid());
+      statement.setString(3, user.getUuid());
+      statement.setString(4, user.getUuid());
+      result = statement.executeQuery();
+      while (result.next()) {
+        UserInformation notFriend = new UserInformation();
+        notFriend.setUuid(result.getString("uuid_user"));
+        notFriend.setPseudo(result.getString("username"));
+        notFriend.setEmail(result.getString("email"));
+        notFriend.setImage(result.getString("image"));
+        notFriend.setIsadmin(result.getBoolean("isadmin"));
+        notFriends.add(notFriend);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        if (result != null) {
+          result.close();
+        }
+        if (statement != null) {
+          statement.close();
+        }
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+    return notFriends;
+  }
 
   public Hashtable<UserInformation, FriendRequest> userReceivingPendingRequests(String uuid) {
     Hashtable<UserInformation, FriendRequest> requests = new Hashtable<UserInformation, FriendRequest>();
@@ -354,7 +393,6 @@ public class AmisDAO extends DAO<Amis> {
         notFriend.setIsadmin(result.getBoolean("isadmin"));
         notFriends.add(notFriend);
       }
-
     } catch (SQLException e) {
       e.printStackTrace();
     } finally {

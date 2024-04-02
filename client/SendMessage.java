@@ -48,7 +48,6 @@ public class SendMessage implements Runnable {
                 bos.writeObject(user);
                 bos.flush();
 
-
             } while (!message.toUpperCase().equals("N"));
 
             scanf.close();

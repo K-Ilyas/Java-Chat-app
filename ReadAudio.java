@@ -1,17 +1,19 @@
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-public class ListenAudio extends Thread {
+public class ReadAudio extends Thread {
 
-    private final InputStream in;
-
-    public ListenAudio(InputStream in) {
-        this.in = in;
+    private final OutputStream out;
+    
+    public ReadAudio(OutputStream out) {
+        this.out = out;
     }
 
     @Override

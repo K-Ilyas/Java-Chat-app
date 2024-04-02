@@ -409,8 +409,6 @@ public class SocketClient {
 
     // list of user that are not friends
 
- 
-
     @SuppressWarnings("unchecked")
     public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsUserPartOf(UserInformation user) {
 
@@ -486,11 +484,45 @@ public class SocketClient {
         return null;
     }
 
-
     @SuppressWarnings("unchecked")
     public LinkedList<UserInformation> getNotFriends(UserInformation user) {
         try {
             dos.writeInt(19);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                return (LinkedList<UserInformation>) ois.readObject();
+            } else
+                System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    public void startVoiceCall(UserInformation user, UserInformation friend) {
+        try {
+            dos.writeInt(20);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            bos.writeObject(friend);
+            bos.flush();
+            System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public LinkedList<UserInformation> getListOfFriendsWithoutFriendRequest(UserInformation user) {
+        try {
+            dos.writeInt(21);
             dos.flush();
             bos.writeObject(user);
             bos.flush();
@@ -733,22 +765,5 @@ public class SocketClient {
         LinkedList<UserInformation> userList = client.getUsers();
 
         client.brodcastMessage("wow", user);
-
-        // client.logOut(user);
-
-        // // Webcam webcam = Webcam.getDefault();
-        // // webcam.open();
-        // // BufferedImage image = webcam.getImage();
-
-        // // Save the image (you can customize the filename)
-        // File outputFile = new File("webcam_image.jpg");
-        // try {
-        // ImageIO.write(image, "JPG", outputFile);
-        // } catch (IOException e) {
-        // e.printStackTrace();
-        // }
-
-        // // // Close the webcam
-        // // webcam.close();
     }
 }

@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Client",
+            "request": "launch",
+            "mainClass": "Client",
+            "projectName": "Java-Chat-app_b99f03fa"
+        },
+        {
+            "type": "java",
             "name": "Example",
             "request": "launch",
             "mainClass": "Example",

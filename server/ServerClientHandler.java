@@ -18,6 +18,9 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.Map.Entry;
 
 public class ServerClientHandler implements Runnable {
@@ -600,12 +603,36 @@ public class ServerClientHandler implements Runnable {
                             dos.writeUTF("SERVER : YOU HAVE NO OTHER USERS NOT FRIENDS");
                             dos.flush();
                         }
+                        break;
+                    case 20:
+                        userInformation = (UserInformation) ois.readObject();
+
+                        UserInformation frined = (UserInformation) ois.readObject();
 
                         break;
+
+                    case 21 :
+                        
+                        userInformation = (UserInformation) ois.readObject();
+                        LinkedList<UserInformation> usersNotInRoom = amis_orm.notFrinedsAndNotSentRequest(userInformation);
+                        if (usersNotInRoom.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE USERS NOT IN ROOM");
+                            dos.flush();
+                            oos.writeObject(usersNotInRoom);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO USERS NOT IN ROOM");
+                            dos.flush();
+                        }
+                        break;
+                    
 
                     default:
                         System.out.println("You have an error in your cmmande please retrait");
                         break;
+                    
                 }
 
             }
