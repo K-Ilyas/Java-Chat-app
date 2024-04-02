@@ -17,10 +17,16 @@ public class ReciveNotification implements Runnable {
 
     private Socket soc = null;
     private boolean shouldRun = true;
+    // private Socket voiceCallSocketReciver = null;
 
     public ReciveNotification(Socket soc) {
         this.soc = soc;
+        // this.voiceCallSocketReciver = null;
     }
+
+    // public void setVoiceCallSocketReciver(Socket voiceCallSocketReciver) {
+    //     this.voiceCallSocketReciver = voiceCallSocketReciver;
+    // }
 
     public void run() {
 
@@ -53,7 +59,26 @@ public class ReciveNotification implements Runnable {
                     System.out.println("Recived message from " + message);
                 } else if (status == 4) {
 
+                    // you recived a voice call from a user
+                    System.out.println("Notification recived : voice call");
+                    UserInformation sender = (UserInformation) ois.readObject();
+                    System.out.println("Recived voice call from " + sender.getUuid());
+                    Socket voiceCallSocket = new Socket("localhost", 8081);
+
+                    // send the user information to the voice call server
+                    // OutputStream out = this.voiceCallSocketReciver.getOutputStream();
+
+                    // DataOutputStream dos = new DataOutputStream(out);
+
+                    // dos.writeInt(5);
+                    // dos.flush();
+
                 }
+                // } else if (status == 5) {
+                //     // you recived a voice call from a user
+                //     System.out.println("Notification recived : voice call");
+                //     Socket voiceCallSocket = new Socket("localhost", 8081);
+                // }
             }
 
         } catch (FileNotFoundException e) {
@@ -64,7 +89,7 @@ public class ReciveNotification implements Runnable {
             e.printStackTrace();
         }
     }
-
+    
     public void setShouldRun(boolean shouldRun) {
         synchronized (this) {
             this.shouldRun = shouldRun;

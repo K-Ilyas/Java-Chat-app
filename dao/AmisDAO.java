@@ -246,14 +246,14 @@ public class AmisDAO extends DAO<Amis> {
     }
     return requests;
   }
-  
+
   // get list of users that are not friend and haven't sent a friend request to it
   public LinkedList<UserInformation> notFrinedsAndNotSentRequest(UserInformation user) {
     LinkedList<UserInformation> notFriends = new LinkedList<UserInformation>();
     PreparedStatement statement = null;
     ResultSet result = null;
     try {
-      String query = "SELECT * FROM user WHERE uuid_user not in (SELECT amis.uuid_first_user FROM user inner join amis on user.uuid_user = amis.uuid_second_user where  user.uuid_user = ? UNION SELECT amis.uuid_second_user FROM user inner join amis  on user.uuid_user = amis.uuid_first_user  where user.uuid_user = ? ) and uuid_user != ? and uuid_user not in (SELECT uuid_reciver FROM friend_request where uuid_sender = ? and request_status = 'pending')";
+      String query = "SELECT * FROM user WHERE uuid_user NOT IN ((SELECT amis.uuid_first_user FROM user INNER JOIN amis ON user.uuid_user = amis.uuid_second_user WHERE user.uuid_user = ?) UNION (SELECT amis.uuid_second_user FROM user INNER JOIN amis ON user.uuid_user = amis.uuid_first_user WHERE user.uuid_user = ?)) AND uuid_user != ? AND uuid_user NOT IN (SELECT uuid_reciver FROM friend_request WHERE uuid_sender = ? AND request_status = 'pending');";
       statement = this.connect.prepareStatement(query);
       statement.setString(1, user.getUuid());
       statement.setString(2, user.getUuid());

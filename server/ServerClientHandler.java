@@ -609,12 +609,23 @@ public class ServerClientHandler implements Runnable {
 
                         UserInformation frined = (UserInformation) ois.readObject();
 
+                        AudioCall audioCall = new AudioCall(userInformation, frined, this.socketServer);
+
+                        audioCall.call();
+
+                        if (audioCall.isSent()) {
+                            Socket newSocket = new Socket("localhost", 8081);
+                            System.out.println("We are connected");
+                        }
+
+
                         break;
 
-                    case 21 :
-                        
+                    case 21:
+
                         userInformation = (UserInformation) ois.readObject();
-                        LinkedList<UserInformation> usersNotInRoom = amis_orm.notFrinedsAndNotSentRequest(userInformation);
+                        LinkedList<UserInformation> usersNotInRoom = amis_orm
+                                .notFrinedsAndNotSentRequest(userInformation);
                         if (usersNotInRoom.size() != 0) {
                             dos.writeInt(1);
                             dos.writeUTF("SERVER : YOU HAVE USERS NOT IN ROOM");
@@ -627,12 +638,11 @@ public class ServerClientHandler implements Runnable {
                             dos.flush();
                         }
                         break;
-                    
 
                     default:
                         System.out.println("You have an error in your cmmande please retrait");
                         break;
-                    
+
                 }
 
             }
@@ -776,7 +786,6 @@ public class ServerClientHandler implements Runnable {
         } catch (ClassNotFoundException e1) {
             e1.printStackTrace();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             try {

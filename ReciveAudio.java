@@ -6,11 +6,11 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-public class ListenAudio extends Thread {
+public class ReciveAudio extends Thread {
 
-    private final InputStream in;
+    private InputStream in;
     
-    public ListenAudio(InputStream in) {
+    public ReciveAudio(InputStream in) {
         this.in = in;
     }
 
@@ -20,7 +20,7 @@ public class ListenAudio extends Thread {
             try {
                 // Obtain the system's default audio output device (speakers)
                 SourceDataLine line;
-                AudioFormat format = new AudioFormat(44100, 16, 2, true, true);
+                AudioFormat format = new AudioFormat(44100, 16, 2, true, false);
                 DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
                 line = (SourceDataLine) AudioSystem.getLine(info);
                 line.open(format);
@@ -32,10 +32,10 @@ public class ListenAudio extends Thread {
                 while ((bytesRead = in.read(buffer, 0, buffer.length)) != -1) {
                     line.write(buffer, 0, bytesRead);
                 }
+
             } catch (LineUnavailableException | IOException e) {
                 e.printStackTrace();
             }
         }
     }
-
 }

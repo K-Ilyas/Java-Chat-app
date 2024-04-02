@@ -31,7 +31,7 @@ public class ReadAudio extends Thread {
                 // Create an input stream to receive audio data from the client
                 byte[] buffer = new byte[100];
                 int bytesRead;
-                while ((bytesRead = in.read(buffer, 0, buffer.length)) != -1) {
+                while ((bytesRead = out.read(buffer, 0, buffer.length)) != -1) {
                     line.write(buffer, 0, bytesRead);
                 }
             } catch (LineUnavailableException | IOException e) {

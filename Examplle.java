@@ -110,5 +110,7 @@ public class Examplle {
                 System.out.println(userInformation.getPseudo() + " - " + userInformation.getUuid());
             }
 
+        
+        client.startVoiceCall(user, userList.get(0));
     }
 }

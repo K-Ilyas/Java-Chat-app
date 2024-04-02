@@ -11,20 +11,23 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import classes.UserInformation;
+import javafx.scene.chart.PieChart.Data;
 
 public class AudioCall {
-
 
     private UserInformation userInformation;
     private UserInformation friend;
     private Server socketServer;
 
+    private boolean isSent = false;
+
     public AudioCall(UserInformation userInformation, UserInformation friend, Server socketServer) {
         this.userInformation = userInformation;
         this.friend = friend;
         this.socketServer = socketServer;
+        this.isSent = false;
     }
-    
+
     public void call() {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -50,6 +53,8 @@ public class AudioCall {
                         oosRecive.writeObject(userInformation);
                         oosRecive.flush();
 
+                        isSent = true;
+
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -74,6 +79,8 @@ public class AudioCall {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+    }
+    public boolean isSent() {
+        return isSent;
     }
 }

@@ -18,11 +18,13 @@ public class AudioServer {
 
                 new Thread(new SendAudio(first_socket_client.getOutputStream())).start();
 
-                new Thread(new SendAudio(second_socket_client.getOutputStream())).start();
+                // new Thread(new SendAudio(second_socket_client.getOutputStream())).start();
 
-                new Thread(new ReciveAudio(first_socket_client.getInputStream())).start();
+                // new Thread(new ReciveAudio(first_socket_client.getInputStream())).start();
 
-                new Thread(new ReciveAudio(second_socket_client.getInputStream())).start();
+                InputStream inner = first_socket_client.getInputStream();   
+
+                new Thread(new ReciveAudio(inner)).start();
 
             }
 
@@ -32,5 +34,14 @@ public class AudioServer {
     }
 
     public static void main(String[] args) {
+
+        AudioServer audioServer = new AudioServer();
+
+        try {
+            audioServer.startVideoServer();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 }

@@ -175,7 +175,6 @@ public class Client extends Application {
     }
 
     private void showVideoFrame(BufferedImage image) {
-        // Display received video in JavaFX UI
         if (image != null) {
             javafx.application.Platform.runLater(() -> {
                 remoteVideoView.setImage(SwingFXUtils.toFXImage(image, null));

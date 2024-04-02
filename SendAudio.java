@@ -9,7 +9,7 @@ import javax.sound.sampled.TargetDataLine;
 
 public class SendAudio extends Thread {
 
-    private final OutputStream out;
+    private OutputStream out;
 
     public SendAudio(OutputStream out) {
         this.out = out;
@@ -33,11 +33,10 @@ public class SendAudio extends Thread {
                 }
                 out.flush();
 
-
                 try {
                     Thread.sleep(200); // Adjust the sleep duration as needed
                 } catch (InterruptedException e) {
-                    e.printStackTrace(); // Handle interruption
+                    e.printStackTrace(); 
                 }
 
             } catch (LineUnavailableException | IOException e) {

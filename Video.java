@@ -54,7 +54,7 @@ public class Video extends Application {
 
             try (InputStream inner = clientSocket.getInputStream();InputStream innerAudio = clientSocketAudio.getInputStream(); ObjectInputStream in = new ObjectInputStream(inner)) {
 
-                new ListenAudio(innerAudio).start();
+                new ReciveAudio(innerAudio).start();
 
                 while (true) {
                     // Capture video frame from webcam

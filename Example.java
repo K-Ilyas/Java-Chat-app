@@ -54,6 +54,8 @@ public class Example {
             System.out.println(userInformation.getPseudo() + " - " + userInformation.getUuid());
         }
 
+        
+
         // client.brodcastMessage("wow", user);
     }
 
