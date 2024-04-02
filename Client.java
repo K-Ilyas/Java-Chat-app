@@ -66,10 +66,8 @@ public class Client extends Application {
         screenCaptureStage.initOwner(primaryStage);
         screenCaptureStage.initStyle(StageStyle.TRANSPARENT);
         screenCaptureStage.setOpacity(0);
-        
         primaryStage.show();
-
-
+        
         // // Start webcam
 
         createScreenCaptureStage(primaryStage);

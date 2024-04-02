@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -449,13 +450,15 @@ public class ServerClientHandler implements Runnable {
                         }
                         break;
                     case 14:
-
                         // create a room with users in it and with admin
-                        UserInformation admin = (UserInformation) ois.readObject();
+                        userInformation = (UserInformation) ois.readObject();
                         Room room = (Room) ois.readObject();
+
+                        @SuppressWarnings("unchecked")
                         LinkedList<UserInformation> users = (LinkedList<UserInformation>) ois.readObject();
-                        if (room_orm.createRoomWithUsers(room, admin, users)) {
+                        if (room_orm.createRoomWithUsers(room, userInformation, users)) {
                             dos.writeUTF("SERVER : YOUR ROOM HAS BEEN CREATED SUCCESFULLY");
+                            oos.writeObject(oos);
                             dos.writeBoolean(true);
                             dos.flush();
                         } else {
@@ -467,8 +470,8 @@ public class ServerClientHandler implements Runnable {
 
                     case 15:
                         // get all rooms with users
+                        userInformation = (UserInformation) ois.readObject();
                         Map<Room, Map<UserInformation, LinkedList<UserInformation>>> list = room_orm.getRoomsAndUsers();
-
                         if (list.size() != 0) {
                             dos.writeInt(1);
                             dos.writeUTF("SERVER : YOU HAVE ROOMS");
@@ -480,7 +483,48 @@ public class ServerClientHandler implements Runnable {
                             dos.writeUTF("SERVER : YOU HAVE NO ROOMS");
                             dos.flush();
                         }
+                        break;
 
+                    case 16:
+                        // get all rooms with users for a specific user
+                        userInformation = (UserInformation) ois.readObject();
+                        Map<Room, Map<UserInformation, LinkedList<UserInformation>>> rooms_part = room_orm
+                                .getRoomsYouArePart(userInformation);
+
+                        if (rooms_part.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE ROOMS");
+                            dos.flush();
+                            oos.writeObject(rooms_part);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO ROOMS");
+                            dos.flush();
+                        }
+                        break;
+
+                    case 17:
+
+                        // send a message to a specific room
+                        userInformation = (UserInformation) ois.readObject();
+                        Room roomMessage = (Room) ois.readObject();
+                        String messageRoom = dis.readUTF();
+
+                        MessageRoom messageRoomObj = new MessageRoom(userInformation.getUuid(),
+                                roomMessage.getUuid_room(), messageRoom, "", false);
+
+                        if (room_orm.sendMessageInRoom(userInformation, messageRoomObj)) {
+                            dos.write(1);
+                            dos.writeUTF("SERVER : YOUR MESSAGE HAS BEEN SENT SUCCESFULLY");
+                            dos.flush();
+                            oos.writeObject(messageRoomObj);
+                            oos.flush();
+                        } else {
+                            dos.write(0);
+                            dos.writeUTF("SERVER : SOMETHING WENT WRONG PLEASE RETRY");
+                            dos.flush();
+                        }
                     default:
                         System.out.println("You have an error in your cmmande please retrait");
                         break;
@@ -626,6 +670,9 @@ public class ServerClientHandler implements Runnable {
             e.printStackTrace();
         } catch (ClassNotFoundException e1) {
             e1.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
             try {
                 if (this.client != null) {

@@ -385,11 +385,35 @@ public class SocketClient {
     @SuppressWarnings("unchecked")
     public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsWithUsers(UserInformation user) {
         try {
-
             if (this.isLoged == false && !user.getUuid().equals(""))
                 return null;
             else {
                 dos.writeInt(15);
+                dos.flush();
+                bos.writeObject(user);
+                bos.flush();
+                if (dis.readInt() == 1) {
+                    System.out.println(dis.readUTF());
+                    return (Map<Room, Map<UserInformation, LinkedList<UserInformation>>>) ois.readObject();
+                } else
+                    System.out.println(dis.readUTF());
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsUserPartOf(UserInformation user) {
+
+        try {
+            if (this.isLoged == false && !user.getUuid().equals(""))
+                return null;
+            else {
+                dos.writeInt(16);
                 dos.flush();
                 bos.writeObject(user);
                 bos.flush();

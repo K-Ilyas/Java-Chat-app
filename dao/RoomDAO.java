@@ -53,7 +53,10 @@ public class RoomDAO extends DAO<Room> {
     String uuid = java.util.UUID.randomUUID().toString();
 
     try {
+      System.out.println("hhhhhhh" + obj.getRoomname() + " " + obj.getImage() + " " + obj.getUuid_owner());
       if (!this.roomExists(obj.getRoomname())) {
+        System.out.println("hhhhhhh" + obj.getRoomname() + " " + obj.getImage() + " " + obj.getUuid_owner());
+
         String query = "INSERT INTO room (uuid_room,roomname,image,uuid_owner) VALUES (?,?,?,?)";
         statement = this.connect.prepareStatement(query);
         statement.setString(1, uuid);
@@ -150,6 +153,103 @@ public class RoomDAO extends DAO<Room> {
       e.printStackTrace();
     }
     return roomsAndUsers;
+  }
+
+  public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsYouArePart(UserInformation user) {
+    Map<Room, Map<UserInformation, LinkedList<UserInformation>>> roomsAndUsers = new HashMap<>();
+    String roomQuery = "SELECT * FROM room INNER JOIN connected ON room.uuid_room = connected.uuid_room WHERE connected.uuid_user = ?";
+    try (PreparedStatement roomStatement = connect.prepareStatement(roomQuery)) {
+      roomStatement.setString(1, user.getUuid());
+      ResultSet roomResultSet = roomStatement.executeQuery();
+      while (roomResultSet.next()) {
+        Room room = new Room(
+            roomResultSet.getString("uuid_room"),
+            roomResultSet.getString("roomname"),
+            roomResultSet.getString("image"),
+            roomResultSet.getString("uuid_owner"));
+
+        String ownerQuery = "SELECT * FROM user WHERE uuid_user = ?";
+        try (PreparedStatement ownerStatement = connect.prepareStatement(ownerQuery)) {
+          ownerStatement.setString(1, room.getUuid_owner());
+          ResultSet ownerResultSet = ownerStatement.executeQuery();
+          if (ownerResultSet.next()) {
+            UserInformation owner = new UserInformation(
+                ownerResultSet.getString("uuid_user"),
+                ownerResultSet.getString("username"),
+                "",
+                ownerResultSet.getString("email"),
+                ownerResultSet.getString("image"),
+                ownerResultSet.getBoolean("isadmin"));
+
+            LinkedList<UserInformation> users = new LinkedList<>();
+            String connectedUsersQuery = "SELECT * FROM connected INNER JOIN user ON user.uuid_user = connected.uuid_user WHERE uuid_room = ? and connected.uuid_user <> ?";
+            try (PreparedStatement connectedUsersStatement = connect.prepareStatement(connectedUsersQuery)) {
+              connectedUsersStatement.setString(1, room.getUuid_room());
+              connectedUsersStatement.setString(2, user.getUuid());
+              ResultSet connectedUsersResultSet = connectedUsersStatement.executeQuery();
+              while (connectedUsersResultSet.next()) {
+                UserInformation connectedUser = new UserInformation(
+                    connectedUsersResultSet.getString("uuid_user"),
+                    connectedUsersResultSet.getString("username"),
+                    "",
+                    connectedUsersResultSet.getString("email"),
+                    connectedUsersResultSet.getString("image"),
+                    connectedUsersResultSet.getBoolean("isadmin"));
+                users.add(connectedUser);
+              }
+            }
+            Map<UserInformation, LinkedList<UserInformation>> usersMap = new HashMap<>();
+            usersMap.put(owner, users);
+            roomsAndUsers.put(room, usersMap);
+          }
+        }
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return roomsAndUsers;
+  }
+
+  // send a message in a room
+
+  public boolean sendMessageInRoom(UserInformation user, MessageRoom messageRoom) throws SQLException {
+    String query = "INSERT INTO messageroom (uuid_room,uuid_user,message) VALUES (?,?,?)";
+    try (PreparedStatement statement = this.connect.prepareStatement(query)) {
+
+      statement.setString(1, messageRoom.getUuidRoom());
+      statement.setString(2, user.getUuid());
+      statement.setString(3, messageRoom.getMessage());
+
+      statement.executeUpdate();
+
+      // Update messageRoom
+
+      // get the id of the inserted message 
+
+
+      String query2 = "SELECT * FROM messageroom WHERE uuid_user = ? AND uuid_room = ? ORDER BY id DESC LIMIT 1";
+      try (PreparedStatement statement2 = this.connect.prepareStatement(query2)) {
+        statement2.setString(1, user.getUuid());
+        statement2.setString(2, messageRoom.getUuidRoom());
+
+        try (ResultSet resultSet = statement2.executeQuery()) {
+          if (resultSet.next()) {
+            messageRoom.setDeleted(resultSet.getBoolean("isDeleted"));
+            messageRoom.setMessageDate(resultSet.getString("date"));
+            messageRoom.setUuidUser(resultSet.getString("uuid_user"));
+            messageRoom.setUuidRoom(resultSet.getString("uuid_room"));
+            messageRoom.setMessage(resultSet.getString("message"));
+          }
+        }
+        return true;
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      return false;
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
   @Override

@@ -54,7 +54,6 @@ public class Server {
     }
 
     public boolean isLogedInOrInit(UserInformation user, Socket soc,Socket soc2) {
-
         if (!this.con_table.isEmpty()) {
             Enumeration<UserInformation> list = this.con_table.keys();
             while (list.hasMoreElements()) {
@@ -76,7 +75,6 @@ public class Server {
             Iterator<Entry<UserInformation, Socket>> iterator = list.iterator();
 
             while (iterator.hasNext()) {
-
                 Entry<UserInformation, Socket> user = iterator.next();
                 System.out.println(String.format("'%s'", user.getKey().getUuid()));
                 if (String.format("'%s'", user.getKey().getUuid()).equals(String.format("'%s'", uuid))) {
