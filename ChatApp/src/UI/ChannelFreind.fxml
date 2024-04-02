@@ -20,7 +20,7 @@
                <Font name="System Bold" size="13.0" />
             </font>
          </Label>
-         <Label layoutX="11.0" layoutY="14.0" prefHeight="39.0" prefWidth="522.0" style="-fx-border-radius: 5; -fx-border-color: gray; -fx-alignment: center;" text="New channel">
+         <Label fx:id="room_name" layoutX="11.0" layoutY="14.0" prefHeight="39.0" prefWidth="522.0" style="-fx-border-radius: 5; -fx-border-color: gray; -fx-alignment: center;" text="New channel">
             <font>
                <Font name="System Bold" size="25.0" />
             </font>

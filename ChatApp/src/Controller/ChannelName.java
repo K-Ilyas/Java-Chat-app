@@ -52,17 +52,21 @@ public class ChannelName implements Initializable {
         // Ajoutez ici la logique pour créer quelque chose avec l'image choisie
          RoomDAO room_dao = new RoomDAO(MySQLConnectSingleton.getInstance());
           room_dao.createRoom(user.getPseudo(), roomname.getText(), lien);
+          System.out.println("*********************************"+user);
+          
       //  ClientHandler.getClientSocket().createRoomWithUsers(user,null, roomname.getText(),lien);
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(".././UI/ChannelFreind.fxml"));
-      Parent root = loader.load();
-  
-      // Obtenez le contrôleur de la nouvelle interface
+      FXMLLoader loader = new FXMLLoader(getClass().getResource(".././UI/ChannelFreind.fxml")); 
+       Parent root = loader.load();
       ChannelController controller = loader.getController();
+      controller.setRoomAndUser(roomname.getText(), user,lien);
+
+// Appeler fillListWithUsers après avoir défini le roomname et le user
+      controller.fillListWithUsers();
+    
+
+
+      // Obtenez le contrôleur de la nouvelle interface
       
-      // Passez les données de roomname et user au contrôleur de la nouvelle interface
-      controller.setRoomname(roomname.getText());
-      controller.setUser(user);
-  
   
     stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
     scene = new Scene(root);
