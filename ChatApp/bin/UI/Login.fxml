@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import io.github.palexdev.materialfx.controls.MFXPasswordField?>
+<?import io.github.palexdev.materialfx.controls.MFXTextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="usename" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #E5E9F0;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.LoginContoller">
+   <children>
+      <MFXButton fx:id="login" layoutX="220.0" layoutY="345.0" onAction="#Login" prefHeight="33.0" prefWidth="159.0" rippleColor="#bb86fc" style="-fx-background-color: #bb86fc; -fx-font-size: 14; -fx-text-fill: #1F1B24; -fx-font-weight: bold;" text="Log in" textAlignment="CENTER">
+         <font>
+            <Font name="Arial Rounded MT Bold" size="12.0" />
+         </font>
+      </MFXButton>
+      <MFXTextField floatingText="username" layoutX="145.0" layoutY="176.0" prefHeight="45.0" prefWidth="315.0">
+         <font>
+            <Font size="11.0" />
+         </font>
+      </MFXTextField>
+      <MFXPasswordField floatingText="password" layoutX="145.0" layoutY="243.0" prefHeight="45.0" prefWidth="315.0" />
+      <Label alignment="CENTER" layoutX="186.0" layoutY="121.0" prefHeight="35.0" prefWidth="230.0" text="Login" textFill="#1f1b24">
+         <font>
+            <Font name="System Bold" size="26.0" />
+         </font>
+      </Label>
+      <ImageView fitHeight="70.0" fitWidth="70.0" layoutX="265.0" layoutY="51.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../resources/image_processing20210410-3722-1dral1b-removebg-preview.png" />
+         </image>
+      </ImageView>
+      <Label contentDisplay="CENTER" layoutX="145.0" layoutY="302.0" prefHeight="34.0" prefWidth="315.0" style="-fx-text-fill: #d90404;" text="WARNNING" textFill="#d90404">
+         <font>
+            <Font name="Arial" size="10.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

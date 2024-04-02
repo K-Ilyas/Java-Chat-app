@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXListView?>
+<?import io.github.palexdev.materialfx.controls.MFXScrollPane?>
+<?import io.github.palexdev.materialfx.controls.MFXTextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="usename" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #E5E9F0;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <MFXListView fx:id="custList" layoutX="14.0" layoutY="8.0" prefHeight="580.0" prefWidth="200.0" style="-fx-border-radius: 100px; -fx-background-radius: 100px;" />
+      <ImageView fitHeight="46.0" fitWidth="48.0" layoutX="14.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../resources/image_processing20210410-3722-1dral1b-removebg-preview.png" />
+         </image>
+      </ImageView>
+      <MFXScrollPane layoutX="14.0" layoutY="52.0" prefHeight="536.0" prefWidth="200.0">
+         <content>
+            <MFXTextField maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefColumnCount="6" prefHeight="30.0" prefWidth="196.0" promptText="Search">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </MFXTextField>
+         </content>
+      </MFXScrollPane>
+      <MFXScrollPane layoutX="229.0" layoutY="56.0" prefHeight="495.0" prefWidth="398.0" style="-fx-background-color: #E5E9F0;" thumbColor="#e5e9f0" thumbHoverColor="#e5e9f0" trackColor="#e5e9f0" />
+      <Label layoutX="72.0" layoutY="11.0" prefHeight="39.0" prefWidth="118.0" text="Chat app">
+         <font>
+            <Font name="Arial Rounded MT Bold" size="21.0" />
+         </font>
+      </Label>
+      <MFXListView fx:id="custList1" layoutX="642.0" layoutY="8.0" prefHeight="580.0" prefWidth="144.0" style="-fx-border-radius: 100px; -fx-background-radius: 100px;" />
+   </children>
+</AnchorPane>
