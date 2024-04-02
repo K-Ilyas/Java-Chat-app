@@ -29,9 +29,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import model.UserInformation;
 
-public class RegisterController extends Application implements Initializable {
+public class RegisterController  implements Initializable {
 
   private Stage stage;
+
   private Scene scene;
   ////////////////////////// Registration //////////////////////////
 
@@ -58,6 +59,10 @@ public class RegisterController extends Application implements Initializable {
   
   UserInformation userInformation = null;
 
+
+  public RegisterController(Stage stage){
+    this.stage = stage;
+  }
   @FXML
   public void signIn(ActionEvent event) throws IOException {
     ClientHandler.initSocker();
@@ -67,27 +72,22 @@ public class RegisterController extends Application implements Initializable {
     String confirmPassword = this.confirmPassword.getText();
     String password = this.password.getText();
     String profile_picture = "https://robohash.org/" + username + ".png";
-
+    FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("./Login.fxml"));
+    loader.setControllerFactory(c -> new LoginContoller(stage));
+    Parent root = loader.load();
+    Scene scene = new Scene(root);
+    stage.setTitle("Login");
+    stage.setScene(scene);
+    stage.setResizable(true);
     if (username.isEmpty() || confirmPassword.isEmpty() || password.isEmpty()) {
       warnning.setText("Please fill all the fields");
       return;
     } else if (password.equals(confirmPassword)) {
       userInformation = ClientHandler.getClientSocket().singIn(username, password);
-      ClientHandler.setLoggedInUser(userInformation);
+      // ClientHandler.setLoggedInUser(userInformation);
 
       if (userInformation.getUuid() != "") {
-        CSSFX.start();
-        Stage newStage = new Stage(); 
-        FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("Main.fxml"));
-        loader.setControllerFactory(c -> new MainContoller(newStage)); 
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        MFXThemeManager.addOn(scene, Themes.DEFAULT, Themes.LEGACY);
-        scene.setFill(Color.TRANSPARENT);
-        newStage.initStyle(StageStyle.TRANSPARENT);
-        newStage.setScene(scene);
-        newStage.setTitle("ChatApp");
-        newStage.show();
+        stage.show();
       } else {
         warnning.setText("User already exists");
       }
@@ -99,31 +99,42 @@ public class RegisterController extends Application implements Initializable {
 
   @FXML
   void havaAnAccount(MouseEvent event) throws IOException {
-    Parent root = FXMLLoader.load(getClass().getResource(".././UI/Login.fxml"));
-    stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    scene = new Scene(root);
-    stage.setScene(scene);
-    stage.show();
+      FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("./Login.fxml"));
+      loader.setControllerFactory(c -> new LoginContoller(stage));
+      Parent root = loader.load();
+          Scene scene = new Scene(root);
+          stage.setTitle("Login");
+          stage.setScene(scene);
+          stage.setResizable(true);
+          stage.show();
   }
+  
 
+   // Method to switch to the login scene
+   @FXML
+   void switchToLogin(MouseEvent event) throws IOException {
+       FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("./Login.fxml"));
+       loader.setControllerFactory(c -> new LoginContoller(stage));
+       Parent root = loader.load();
+       Scene scene = new Scene(root);
+       stage.setTitle("Login");
+       stage.setScene(scene);
+       stage.setResizable(true);
+       stage.show();
+   }
   @Override
   public void initialize(URL location, ResourceBundle resources) {
-    // TODO Auto-generated method stub
     hava_account.setOnMouseClicked(arg0 -> {
       try {
-        havaAnAccount(arg0);
+        switchToLogin(arg0);
       } catch (IOException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     });
   }
 
-  @Override
-  public void start(Stage arg0) throws Exception {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'start'");
 
-  }
+
+
 
 }

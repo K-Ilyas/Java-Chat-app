@@ -4,26 +4,31 @@
 <?import io.github.palexdev.materialfx.controls.MFXListView?>
 <?import io.github.palexdev.materialfx.controls.MFXScrollPane?>
 <?import io.github.palexdev.materialfx.controls.MFXTextField?>
+<?import io.github.palexdev.mfxcore.controls.Label?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <GridPane fx:id="rootPane" hgap="20.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="648.0" prefWidth="1162.0" styleClass="grid-pane" stylesheets="@../css/ListViews.css" vgap="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MessagesContoller">
     <columnConstraints>
-        <ColumnConstraints halignment="CENTER" />
-        <ColumnConstraints halignment="CENTER" />
+        <ColumnConstraints halignment="CENTER" maxWidth="143.4" minWidth="143.4" prefWidth="143.4" />
+        <ColumnConstraints halignment="CENTER" maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
         <ColumnConstraints halignment="CENTER" />
       <ColumnConstraints halignment="CENTER" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints halignment="CENTER" minWidth="10.0" prefWidth="20.0" />
-        <ColumnConstraints halignment="CENTER" minWidth="10.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" prefWidth="100.0" />
     </columnConstraints>
     <rowConstraints>
         <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
         <RowConstraints prefHeight="32.0" />
         <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
         <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
@@ -34,34 +39,75 @@
     <padding>
         <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
     </padding>
-    <StackPane minHeight="150.0" GridPane.rowSpan="2147483647">
+    <StackPane minHeight="150.0" styleClass="grid-background" GridPane.rowSpan="2147483647">
         <GridPane.margin>
             <Insets left="-15.0" right="-15.0" />
         </GridPane.margin>
     </StackPane>
+   <MFXTextField floatingText="Search" fx:id="searchUserTF" prefHeight="50.0" prefWidth="138.0" />
     <MFXListView id="custList" fx:id="userList" onMouseClicked="#handleUserClick" prefHeight="534.0" prefWidth="198.0" styleClass="grid-background" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
         <GridPane.margin>
             <Insets bottom="15.0" />
         </GridPane.margin>
     </MFXListView>
-    <StackPane prefHeight="488.0" prefWidth="707.0" styleClass="grid-background" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowSpan="6">
-        <GridPane.margin>
-            <Insets />
-        </GridPane.margin>
+   <StackPane fx:id="ChatInformation" alignment="CENTER_RIGHT" styleClass="grid-background" GridPane.columnIndex="2" GridPane.columnSpan="3">
       <children>
-         <MFXScrollPane>
-            <content>
-               <VBox fx:id="chatPane" minHeight="-Infinity" prefHeight="562.0" prefWidth="876.0" />
-            </content>
-         </MFXScrollPane>
+         <HBox fx:id="RightInfo" alignment="CENTER_RIGHT" spacing="12.0" StackPane.alignment="CENTER_LEFT">
+            <children>
+               <MFXButton fx:id="voiceBtn" text="Voice Call" />
+               <MFXButton fx:id="VideoBtn" alignment="CENTER" text="Video Call" />
+            </children>
+            <opaqueInsets>
+               <Insets />
+            </opaqueInsets>
+            <StackPane.margin>
+               <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+            </StackPane.margin>
+         </HBox>
+         <HBox fx:id="leftInfo" alignment="CENTER_LEFT" prefHeight="66.0" prefWidth="796.0" spacing="12.0" StackPane.alignment="CENTER">
+            <opaqueInsets>
+               <Insets />
+            </opaqueInsets>
+            <children>
+               <Label fx:id="RcLabel" ellipsisString="//" prefHeight="68.0" prefWidth="325.0" text="Chat Panel">
+                  <font>
+                     <Font name="Arial Black" size="23.0" />
+                  </font>
+               </Label>
+            </children>
+            <StackPane.margin>
+               <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+            </StackPane.margin>
+         </HBox>
       </children>
-    </StackPane>
-    <Label styleClass="header-label" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" />
-   <MFXTextField prefHeight="50.0" prefWidth="170.0" fx:id="searchUserTF" />
-   <MFXTextField fx:id="messageInput" prefHeight="50.0" prefWidth="730.0" GridPane.columnIndex="2" GridPane.rowIndex="6" GridPane.rowSpan="2147483647" />
-   <HBox fx:id="actions" alignment="CENTER" GridPane.columnIndex="3" GridPane.columnSpan="2147483647" GridPane.rowIndex="6" GridPane.rowSpan="2147483647">
+   </StackPane>
+   <MFXScrollPane fx:id="messageScroller" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="435.0" prefWidth="762.0" styleClass="grid-background" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="6">
+      <content>
+         <VBox fx:id="chatPane" prefHeight="432.0" prefWidth="746.0" spacing="12.0" />
+      </content>
+   </MFXScrollPane>
+   <MFXTextField fx:id="messageInput" prefHeight="50.0" prefWidth="624.0" GridPane.columnIndex="2" GridPane.rowIndex="7" GridPane.rowSpan="2147483647" />
+   <HBox fx:id="actions" alignment="CENTER" spacing="12.0" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="7" GridPane.rowSpan="2147483647">
       <children>
-         <MFXButton fx:id="emoji" text="Emoji" />
+         <MFXButton fx:id="emoji" text="Emoji" onAction="#emojiSelectorBtnAction" />
          <MFXButton fx:id="send" alignment="CENTER" onAction="#sendButtonAction" text="Send" />
       </children></HBox>
+   <StackPane minHeight="150.0" styleClass="grid-background" GridPane.columnIndex="5" GridPane.columnSpan="2147483647" GridPane.rowSpan="2147483647">
+      <children>
+         <VBox alignment="TOP_CENTER" maxWidth="-Infinity" prefHeight="626.0" prefWidth="173.0">
+            <children>
+               <ImageView fitHeight="115.0" fitWidth="136.0" pickOnBounds="true" preserveRatio="true">
+                  <image>
+                     <Image url="@../../../../../../chatJavaFx/resources/image_processing20210410-3722-1dral1b-removebg-preview.png" />
+                  </image>
+               </ImageView>
+               <Label fx:id="RcLabel1" alignment="CENTER" contentDisplay="CENTER" ellipsisString="//" prefHeight="68.0" prefWidth="325.0" text="Personal Info">
+                  <font>
+                     <Font name="Arial Black" size="14.0" />
+                  </font>
+               </Label>
+            </children>
+         </VBox>
+      </children>
+   </StackPane>
 </GridPane>

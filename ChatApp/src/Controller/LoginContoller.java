@@ -64,17 +64,17 @@ public class LoginContoller extends Application {
     } else if (user != null) {
       ClientHandler.setLoggedInUser(user);
       CSSFX.start();
-      Stage newStage = new Stage(); // Create a new stage
+      // Stage newStage = new Stage(); // Create a new stage
       FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("Main.fxml"));
-      loader.setControllerFactory(c -> new MainContoller(newStage)); 
+      loader.setControllerFactory(c -> new MainContoller(stage)); 
       Parent root = loader.load();
       Scene scene = new Scene(root);
       MFXThemeManager.addOn(scene, Themes.DEFAULT, Themes.LEGACY);
-      scene.setFill(Color.TRANSPARENT);
-      newStage.initStyle(StageStyle.TRANSPARENT);
-      newStage.setScene(scene);
-      newStage.setTitle("ChatApp");
-      newStage.show();
+      // scene.setFill(Color.TRANSPARENT);
+      // stage.initStyle(StageStyle.TRANSPARENT);
+      stage.setScene(scene);
+      stage.setTitle("ChatApp");
+      stage.show();
     } else {
       warning.setText("Invalid username or password");
       return;
@@ -83,11 +83,14 @@ public class LoginContoller extends Application {
 
   @FXML
   void creatAccount(MouseEvent event) throws IOException {
-    Parent root = FXMLLoader.load(getClass().getResource(".././UI/Register.fxml"));
-    stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    scene = new Scene(root);
-    stage.setScene(scene);
-    stage.show();
+    FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("./Register.fxml"));
+    loader.setControllerFactory(c -> new RegisterController(stage));
+    Parent root = loader.load();
+        Scene scene = new Scene(root);
+        stage.setTitle("Refister");
+        stage.setScene(scene);
+        stage.setResizable(true);
+        stage.show();
   }
 
   @FXML

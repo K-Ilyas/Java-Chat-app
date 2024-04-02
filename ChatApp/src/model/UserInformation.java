@@ -1,5 +1,4 @@
 package model;
-
 import java.io.Serializable;
 import java.lang.Comparable;
 
@@ -27,12 +26,6 @@ public class UserInformation implements Comparable<UserInformation>, Serializabl
         this.password = password;
 
     }
-    public UserInformation(String pseudo, String image, boolean isImage) {
-
-      this.pseudo = pseudo;
-      this.image = image;
-
-  }
 
     public UserInformation(String uuid, String pseudo, String password, String email, String image, boolean isadmin) {
         this.uuid = uuid;

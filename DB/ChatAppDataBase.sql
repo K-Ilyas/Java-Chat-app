@@ -2,6 +2,42 @@ CREATE DATABASE  IF NOT EXISTS `chat`;
 USE `chat`;
 
 
+
+
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
+  `uuid_user` varchar(200) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `image` varchar(100) NOT NULL,
+  `username` varchar(60) NOT NULL,
+  `hashpasword` varchar(100) NOT NULL,
+  `isadmin` tinyint(1) NOT NULL,
+  PRIMARY KEY (`uuid_user`),
+  UNIQUE KEY `username` (`username`)
+);
+
+
+LOCK TABLES `user` WRITE;
+UNLOCK TABLES;
+
+
+
+DROP TABLE IF EXISTS `room`;
+CREATE TABLE `room` (
+  `uuid_room` varchar(200) NOT NULL,
+  `roomname` varchar(50) NOT NULL,
+  `image` varchar(100) NOT NULL,
+  PRIMARY KEY (`uuid_room`),
+  UNIQUE KEY `roomname` (`roomname`)
+);
+
+
+
+LOCK TABLES `room` WRITE;
+UNLOCK TABLES;
+
+
+
 DROP TABLE IF EXISTS `amis`;
 
 CREATE TABLE `amis` (
@@ -60,7 +96,7 @@ CREATE TABLE `messageto` (
   `uuid_reciver` varchar(200) NOT NULL,
   `uuid_sender` varchar(200) NOT NULL,
   `message` text NOT NULL,
-  `message_date` date NOT NULL DEFAULT (curdate()),
+  `message_date` datetime DEFAULT NULL,
   `isDelated` tinyint(1) NOT NULL DEFAULT '0',
   KEY `fk_uuid_reciver` (`uuid_reciver`),
   KEY `fk_uuid_sender` (`uuid_sender`),
@@ -75,34 +111,4 @@ LOCK TABLES `messageto` WRITE;
 UNLOCK TABLES;
 
 
-DROP TABLE IF EXISTS `room`;
-CREATE TABLE `room` (
-  `uuid_room` varchar(200) NOT NULL,
-  `roomname` varchar(50) NOT NULL,
-  `image` varchar(100) NOT NULL,
-  PRIMARY KEY (`uuid_room`),
-  UNIQUE KEY `roomname` (`roomname`)
-);
 
-
-
-LOCK TABLES `room` WRITE;
-UNLOCK TABLES;
-
-
-
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE `user` (
-  `uuid_user` varchar(200) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `image` varchar(100) NOT NULL,
-  `username` varchar(60) NOT NULL,
-  `hashpasword` varchar(100) NOT NULL,
-  `isadmin` tinyint(1) NOT NULL,
-  PRIMARY KEY (`uuid_user`),
-  UNIQUE KEY `username` (`username`)
-);
-
-
-LOCK TABLES `user` WRITE;
-UNLOCK TABLES;

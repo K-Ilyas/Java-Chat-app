@@ -5,13 +5,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Scanner;
 
 import Controller.MessagesContoller;
-import model.API;
-import model.FriendRequest;
-import model.MessageTo;
-import model.UserInformation;
+import model.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -45,14 +43,14 @@ public class SocketClient {
     private DataOutputStream dos;
     private ObjectOutputStream bos;
     private ObjectInputStream ois;
-    private MessagesContoller messageController;
 
     private LinkedList<UserInformation> userList = null;
     private LinkedList<MessageTo> messageList = null;
     private Hashtable<UserInformation, FriendRequest> listRequests = null;
     LinkedList<UserInformation> friends = null;
-
+private MessagesContoller messageController;
     public SocketClient() {
+
         this.socket = null;
         try {
 
@@ -72,9 +70,14 @@ public class SocketClient {
             e.printStackTrace();
         }
     }
+
+    public ReciveNotification getRecive() {
+        return this.recive;
+    }
     public void setMessageController(MessagesContoller messageController) {
         this.messageController = messageController;
     }
+
     public UserInformation login(String pseudo, String password) {
         UserInformation user = null;
         try {
@@ -92,7 +95,7 @@ public class SocketClient {
                 this.userInformation = (UserInformation) ois.readObject();
                 this.isLoged = true;
                 this.recive = new ReciveNotification(this.socketMessage);
-                // new Thread(this.recive).start();
+                new Thread(this.recive).start();
                 System.out.println("Recive message thread started");
             }
         } catch (IOException e) {
@@ -277,7 +280,7 @@ public class SocketClient {
     }
 
     @SuppressWarnings("unchecked")
-    public Hashtable<UserInformation, FriendRequest> getFriendRequest(UserInformation user) {
+    public Hashtable<UserInformation, FriendRequest> getFriendRequests(UserInformation user) {
         try {
             dos.writeInt(10);
             dos.flush();
@@ -320,7 +323,6 @@ public class SocketClient {
 
     // list of frineds
     @SuppressWarnings("unchecked")
-
     public LinkedList<UserInformation> getFriends(UserInformation user) {
 
         try {
@@ -339,7 +341,7 @@ public class SocketClient {
         } catch (ClassNotFoundException e) {
             API.printMessageClient(e.getMessage());
         }
-        return this.userList;
+        return this.friends;
     }
 
     // delete friend
@@ -359,8 +361,183 @@ public class SocketClient {
         return false;
     }
 
-    public ReciveNotification getRecive() {
-        return this.recive;
+    // create a room with a list of users
+    public boolean createRoomWithUsers(UserInformation user, LinkedList<UserInformation> users, String RoomName,
+            String image) {
+        try {
+
+            Room room = new Room("", RoomName, image, user.getUuid());
+            dos.writeInt(14);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            bos.writeObject(room);
+            bos.flush();
+            bos.writeObject(users);
+            bos.flush();
+            System.out.println(dis.readUTF());
+            return dis.readBoolean();
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return false;
+    }
+
+    // get list of rooms and users
+    @SuppressWarnings("unchecked")
+    public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsWithUsers(UserInformation user) {
+        try {
+            if (this.isLoged == false && !user.getUuid().equals(""))
+                return null;
+            else {
+                dos.writeInt(15);
+                dos.flush();
+                bos.writeObject(user);
+                bos.flush();
+                if (dis.readInt() == 1) {
+                    System.out.println(dis.readUTF());
+                    return (Map<Room, Map<UserInformation, LinkedList<UserInformation>>>) ois.readObject();
+                } else
+                    System.out.println(dis.readUTF());
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    // list of user that are not friends
+
+    @SuppressWarnings("unchecked")
+    public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsUserPartOf(UserInformation user) {
+
+        try {
+            if (this.isLoged == false && !user.getUuid().equals(""))
+                return null;
+            else {
+                dos.writeInt(16);
+                dos.flush();
+                bos.writeObject(user);
+                bos.flush();
+                if (dis.readInt() == 1) {
+                    System.out.println(dis.readUTF());
+                    return (Map<Room, Map<UserInformation, LinkedList<UserInformation>>>) ois.readObject();
+                } else
+                    System.out.println(dis.readUTF());
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    // send a message to a specific room
+
+    public boolean sendMessageToRoom(UserInformation user, Room room, String message) {
+        try {
+            dos.writeInt(17);
+            dos.flush();
+            dos.writeUTF(message);
+            dos.flush();
+            bos.writeObject(room);
+            bos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+
+                System.out.println(dis.readUTF());
+                return true;
+            } else {
+                System.out.println("There is an issue");
+                System.out.println(dis.readUTF());
+                return false;
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Hashtable<UserInformation, MessageRoom> getMessagesFromRoom(UserInformation user, Room room) {
+        try {
+            dos.writeInt(18);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            bos.writeObject(room);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                return (Hashtable<UserInformation, MessageRoom>) ois.readObject();
+            } else {
+                System.out.println(dis.readUTF());
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public LinkedList<UserInformation> getNotFriends(UserInformation user) {
+        try {
+            dos.writeInt(19);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                return (LinkedList<UserInformation>) ois.readObject();
+            } else
+                System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    public void startVoiceCall(UserInformation user, UserInformation friend) {
+        try {
+            dos.writeInt(20);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            bos.writeObject(friend);
+            bos.flush();
+            System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public LinkedList<UserInformation> getListOfFriendsWithoutFriendRequest(UserInformation user) {
+        try {
+            dos.writeInt(21);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                return (LinkedList<UserInformation>) ois.readObject();
+            } else
+                System.out.println(dis.readUTF());
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
     }
 
     public void choix() {
@@ -392,219 +569,202 @@ public class SocketClient {
         return choix;
     }
 
-    // public void startConversation() throws ClassNotFoundException {
+    public void startConversation() throws ClassNotFoundException {
 
-    //     if (this.isConnected) {
+        if (this.isConnected) {
 
-    //         try {
-    //             OutputStream out = this.socket.getOutputStream();
-    //             InputStream in = this.socket.getInputStream();
+            try {
+                OutputStream out = this.socket.getOutputStream();
+                InputStream in = this.socket.getInputStream();
 
-    //             DataInputStream dis = new DataInputStream(in);
-    //             DataOutputStream dos = new DataOutputStream(out);
-    //             ObjectOutputStream bos = new ObjectOutputStream(out);
-    //             ObjectInputStream ois = new ObjectInputStream(in);
+                DataInputStream dis = new DataInputStream(in);
+                DataOutputStream dos = new DataOutputStream(out);
+                ObjectOutputStream bos = new ObjectOutputStream(out);
+                ObjectInputStream ois = new ObjectInputStream(in);
 
-    //             int choix = 0;
+                int choix = 0;
 
-    //             String pseudo = "", password = "", passwordConfirme = "";
-    //             int i = 0;
-    //             boolean isTrue = true;
+                String pseudo = "", password = "", passwordConfirme = "";
+                int i = 0;
+                boolean isTrue = true;
 
-    //             while (isTrue) {
-    //                 this.choix();
+                while (isTrue) {
+                    this.choix();
 
-    //                 choix = this.decision();
+                    choix = this.decision();
 
-    //                 switch (choix) {
-    //                     case 1:
-    //                         if (!this.isLoged) {
-    //                             int j = 0;
-    //                             do {
-    //                                 dos.writeInt(1);
-    //                                 dos.flush();
-    //                                 API.printMessageClient("Enter your pseudo ==>> ");
-    //                                 pseudo = scanf.nextLine();
-    //                                 API.printMessageClient("Enter your password ==>> ");
-    //                                 password = scanf.nextLine();
-    //                                 this.userInformation = new UserInformation(pseudo, password);
-    //                                 bos.writeObject(this.userInformation);
-    //                                 bos.flush();
+                    switch (choix) {
+                        case 1:
+                            if (!this.isLoged) {
+                                int j = 0;
+                                do {
+                                    dos.writeInt(1);
+                                    dos.flush();
+                                    API.printMessageClient("Enter your pseudo ==>> ");
+                                    pseudo = scanf.nextLine();
+                                    API.printMessageClient("Enter your password ==>> ");
+                                    password = scanf.nextLine();
+                                    this.userInformation = new UserInformation(pseudo, password);
+                                    bos.writeObject(this.userInformation);
+                                    bos.flush();
 
-    //                                 i = dis.readInt();
-    //                                 API.printMessageClient(dis.readUTF());
+                                    i = dis.readInt();
+                                    API.printMessageClient(dis.readUTF());
 
-    //                                 if (i == 0)
-    //                                     API.printMessageClient("PLEASE RETRY");
-    //                                 else {
-    //                                     this.isLoged = true;
-    //                                     isTrue = false;
-    //                                 }
-    //                                 if (j == 2) {
-    //                                     API.printMessageClient("sorry your time expired");
-    //                                 }
-    //                                 j++;
+                                    if (i == 0)
+                                        API.printMessageClient("PLEASE RETRY");
+                                    else {
+                                        this.isLoged = true;
+                                        isTrue = false;
+                                    }
+                                    if (j == 2) {
+                                        API.printMessageClient("sorry your time expired");
+                                    }
+                                    j++;
 
-    //                             } while (i == 0 && j < 3);
-    //                         } else
-    //                             System.err.println("Soory you elaready LOG IN");
+                                } while (i == 0 && j < 3);
+                            } else
+                                System.err.println("Soory you elaready LOG IN");
 
-    //                         break;
+                            break;
 
-    //                     case 2:
-    //                         if (!this.isLoged) {
+                        case 2:
+                            if (!this.isLoged) {
 
-    //                             do {
-    //                                 dos.writeInt(2);
-    //                                 dos.writeUTF("OK-OK-OK-OK");
-    //                                 dos.flush();
-    //                                 API.printMessageClient("Enter your pseudo ==>>");
-    //                                 pseudo = scanf.nextLine();
+                                do {
+                                    dos.writeInt(2);
+                                    dos.writeUTF("OK-OK-OK-OK");
+                                    dos.flush();
+                                    API.printMessageClient("Enter your pseudo ==>>");
+                                    pseudo = scanf.nextLine();
 
-    //                                 do {
-    //                                     API.printMessageClient("Enter your password ==>>");
-    //                                     password = scanf.nextLine();
-    //                                     API.printMessageClient("confirme your password :");
-    //                                     passwordConfirme = scanf.nextLine();
+                                    do {
+                                        API.printMessageClient("Enter your password ==>>");
+                                        password = scanf.nextLine();
+                                        API.printMessageClient("confirme your password :");
+                                        passwordConfirme = scanf.nextLine();
 
-    //                                     if (!password.equals(passwordConfirme))
-    //                                         API.printMessageClient("PASSWORD NOT LIKE PASSWORD CONFIRME PLEASE RETRY");
-    //                                     if (password.length() < 5)
-    //                                         API.printMessageClient(
-    //                                                 "sorry your password length must be greather than 5");
+                                        if (!password.equals(passwordConfirme))
+                                            API.printMessageClient("PASSWORD NOT LIKE PASSWORD CONFIRME PLEASE RETRY");
+                                        if (password.length() < 5)
+                                            API.printMessageClient(
+                                                    "sorry your password length must be greather than 5");
 
-    //                                 } while (password != passwordConfirme && password.length() < 5);
+                                    } while (password != passwordConfirme && password.length() < 5);
 
-    //                                 this.userInformation = new UserInformation(pseudo, password);
-    //                                 bos.writeObject(this.userInformation);
-    //                                 bos.flush();
-    //                                 dos.writeUTF("OK-OK-OK-OK");
-    //                                 dos.flush();
+                                    this.userInformation = new UserInformation(pseudo, password);
+                                    bos.writeObject(this.userInformation);
+                                    bos.flush();
+                                    dos.writeUTF("OK-OK-OK-OK");
+                                    dos.flush();
 
-    //                                 i = dis.readInt();
-    //                                 API.printMessageClient(dis.readUTF());
+                                    i = dis.readInt();
+                                    API.printMessageClient(dis.readUTF());
 
-    //                                 if (i == 0)
-    //                                     API.printMessageClient("PLEASE RETRY");
-    //                                 else {
-    //                                     this.isLoged = true;
-    //                                     isTrue = false;
-    //                                 }
+                                    if (i == 0)
+                                        API.printMessageClient("PLEASE RETRY");
+                                    else {
+                                        this.isLoged = true;
+                                        isTrue = false;
+                                    }
 
-    //                             } while (i == 0);
-    //                         } else
-    //                             System.err.println("Soory you elaready LOG IN");
+                                } while (i == 0);
+                            } else
+                                System.err.println("Soory you elaready LOG IN");
 
-    //                         break;
-    //                     default:
-    //                         System.err.println("your choice is wrong !!");
-    //                         break;
-    //                 }
+                            break;
+                        default:
+                            System.err.println("your choice is wrong !!");
+                            break;
+                    }
 
-    //             }
-    //             userInformation = (UserInformation) ois.readObject();
+                }
+                userInformation = (UserInformation) ois.readObject();
 
-    //             @SuppressWarnings("unchecked")
-    //             LinkedList<UserInformation> userList = (LinkedList<UserInformation>) ois.readObject();
+                @SuppressWarnings("unchecked")
+                LinkedList<UserInformation> userList = (LinkedList<UserInformation>) ois.readObject();
 
-    //             this.choixMode();
-    //             choix = this.decision();
+                this.choixMode();
+                choix = this.decision();
 
-    //             switch (1) {
-    //                 case 1:
-    //                     API.printMessageClient("LIST OF USERS   :");
-    //                     for (int index = 0; index < userList.size(); index++) {
-    //                         UserInformation user = userList.get(index);
+                switch (1) {
+                    case 1:
+                        API.printMessageClient("LIST OF USERS   :");
+                        for (int index = 0; index < userList.size(); index++) {
+                            UserInformation user = userList.get(index);
 
-    //                         API.printMessageClient(
-    //                                 "[" + (index + 1) + "] : " + user.getPseudo() + " - " + user.getUuid());
-    //                     }
+                            API.printMessageClient(
+                                    "[" + (index + 1) + "] : " + user.getPseudo() + " - " + user.getUuid());
+                        }
 
-    //                     int amis = 0;
+                        int amis = 0;
 
-    //                     do {
-    //                         amis = scanf.nextInt();
-    //                         scanf.nextLine();
-    //                         if (amis < 1 || amis > userList.size() + 1)
-    //                             System.out.println("Your choice is wrong please retry");
-    //                     } while (amis < 1 || amis > userList.size() + 1);
+                        do {
+                            amis = scanf.nextInt();
+                            scanf.nextLine();
+                            if (amis < 1 || amis > userList.size() + 1)
+                                System.out.println("Your choice is wrong please retry");
+                        } while (amis < 1 || amis > userList.size() + 1);
 
-    //                     dos.writeInt(0);
-    //                     dos.flush();
-    //                     dos.writeInt(amis - 1);
-    //                     dos.flush();
+                        dos.writeInt(0);
+                        dos.flush();
+                        dos.writeInt(amis - 1);
+                        dos.flush();
 
-    //                     @SuppressWarnings("unchecked")
-    //                     LinkedList<MessageTo> messageList = (LinkedList<MessageTo>) ois.readObject();
-    //                     UserInformation friend = userList.get(amis - 1);
+                        @SuppressWarnings("unchecked")
+                        LinkedList<MessageTo> messageList = (LinkedList<MessageTo>) ois.readObject();
+                        UserInformation friend = userList.get(amis - 1);
 
-    //                     System.out.println("CONVERSATION WITH " + friend.getPseudo());
-    //                     for (int index = 0; index < messageList.size(); index++) {
-    //                         MessageTo message = messageList.get(index);
-    //                         if (message.getIsDelated() == false) {
-    //                             if (message.getUuid_sender().equals(this.userInformation.getUuid()))
-    //                                 API.printMessageClient("[you ] : { message : " + message.getMessage() + ", date : "
-    //                                         + message.getMessage_date().toString() + "}");
-    //                             else
-    //                                 API.printMessageClient("[" + message.getUuid_sender() + "-" + friend.getPseudo()
-    //                                         + "] : { message : " + message.getMessage() + ", date : "
-    //                                         + message.getMessage_date().toString() + "}");
-    //                         }
-    //                     }
+                        System.out.println("CONVERSATION WITH " + friend.getPseudo());
+                        for (int index = 0; index < messageList.size(); index++) {
+                            MessageTo message = messageList.get(index);
+                            if (message.getIsDelated() == false) {
+                                if (message.getUuid_sender().equals(this.userInformation.getUuid()))
+                                    API.printMessageClient("[you ] : { message : " + message.getMessage() + ", date : "
+                                            + message.getMessage_date().toString() + "}");
+                                else
+                                    API.printMessageClient("[" + message.getUuid_sender() + "-" + friend.getPseudo()
+                                            + "] : { message : " + message.getMessage() + ", date : "
+                                            + message.getMessage_date().toString() + "}");
+                            }
+                        }
 
-    //                     break;
+                        break;
 
-    //                 case 2:
+                    case 2:
 
-    //                     // for rooms connection
+                        // for rooms connection
 
-    //                     break;
+                        break;
 
-    //                 default:
-    //                     break;
-    //             }
+                    default:
+                        break;
+                }
 
-    //         } catch (FileNotFoundException e) {
-    //             e.printStackTrace();
-    //         } catch (IOException e) {
-    //             e.printStackTrace();
-    //         }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-    //     } else
-    //         API.printMessageClient("THE CLIENT IS NOT CONNECTED");
+        } else
+            API.printMessageClient("THE CLIENT IS NOT CONNECTED");
 
-    // }
+    }
 
-    // // public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) throws ClassNotFoundException {
 
-    // //     SocketClient client = new SocketClient();
-    // //     // client.startConversation();
+        SocketClient client = new SocketClient();
+        // client.startConversation();
 
-    // //     UserInformation user = null;
+        UserInformation user = null;
 
-    // //     user = client.login("Amine", "Amine");
+        user = client.login("Amine", "Amine");
 
-    // //     System.out.println(user.getPseudo() + " - " + user.getUuid());
+        System.out.println(user.getPseudo() + " - " + user.getUuid());
 
-    // //     LinkedList<UserInformation> userList = client.getUsers();
+        LinkedList<UserInformation> userList = client.getUsers();
 
-    // //     client.brodcastMessage("wow", user);
-
-    // //     // client.logOut(user);
-
-    // //     // // Webcam webcam = Webcam.getDefault();
-    // //     // // webcam.open();
-    // //     // // BufferedImage image = webcam.getImage();
-
-    // //     // // Save the image (you can customize the filename)
-    // //     // File outputFile = new File("webcam_image.jpg");
-    // //     // try {
-    // //     // ImageIO.write(image, "JPG", outputFile);
-    // //     // } catch (IOException e) {
-    // //     // e.printStackTrace();
-    // //     // }
-
-    // //     // // // Close the webcam
-    // //     // // webcam.close();
-    // // }
+        client.brodcastMessage("wow", user);
+    }
 }

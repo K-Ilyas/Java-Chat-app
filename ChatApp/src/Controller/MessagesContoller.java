@@ -1,18 +1,22 @@
 package Controller;
 
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
 
 import Client.ClientHandler;
 import Events.NotificationEvent;
+import UI.ResourceLoader;
 import io.github.palexdev.materialfx.controls.MFXButton;
 import io.github.palexdev.materialfx.controls.MFXListView;
 import io.github.palexdev.materialfx.controls.MFXScrollPane;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import io.github.palexdev.materialfx.controls.cell.MFXListCell;
 import io.github.palexdev.materialfx.utils.others.FunctionalStringConverter;
+import io.github.palexdev.mfxcomponents.controls.base.MFXLabeled;
 import io.github.palexdev.mfxresources.fonts.MFXFontIcon;
 import io.github.palexdev.virtualizedfx.enums.ScrollPaneEnums.ScrollBarPolicy;
 import javafx.application.Platform;
@@ -26,9 +30,12 @@ import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -41,6 +48,7 @@ import bubble.*;
 
 public class MessagesContoller implements Initializable
 {
+    private static MessagesContoller instance;
     
 
     @FXML 
@@ -66,6 +74,16 @@ public class MessagesContoller implements Initializable
     private MFXScrollPane messageScroller;
 
     @FXML 
+    private Label RcLabel;
+
+    @FXML 
+    private MFXButton voiceBtn;
+
+    @FXML 
+    private MFXButton videoBtn;
+
+
+    @FXML 
     private MFXTextField searchUserTF;
 
 
@@ -75,8 +93,11 @@ public class MessagesContoller implements Initializable
 
     private Stage stage;
 
+
+    private Stage emojiSelectorStage;
     MessagesContoller(Stage stage){
         this.stage = stage;
+        instance = this;
     }
     
     @Override
@@ -85,7 +106,6 @@ public class MessagesContoller implements Initializable
 
         // Set the policy of the vertical scrollbar to always display
         // messageScroller.setVbarPolicy(MFXScrollPane.ScrollBarPolicy.ALWAYS);
-
 
         // Bind the height of the content to the height of the viewport
         // chatPane.prefHeightProperty().bind(messageScroller.heightProperty());
@@ -100,22 +120,6 @@ public class MessagesContoller implements Initializable
             }
         });
 
-        // // Listen for custom events
-        // Platform.runLater(() -> {
-        //     Scene scene = rootPane.getScene();
-        //     if (scene != null) {
-        //         scene.addEventHandler(NotificationEvent.NOTIFICATION_EVENT_TYPE, new EventHandler<NotificationEvent>() {
-        //             @Override
-        //             public void handle(NotificationEvent event) {
-        //                 UserInformation sender = event.getSender();
-        //                 MessageTo message = event.getMessage();
-        //                 setNotification(sender, message);
-        //             }
-        //         });
-        //     } else {
-        //         System.err.println("Scene is null. Unable to add event handler.");
-        //     }
-        // });
 
         ClientHandler.getClientSocket().getRecive().setMessagesContoller(this);
         Thread Notifications = new Thread(ClientHandler.getClientSocket().getRecive());
@@ -174,12 +178,6 @@ public class MessagesContoller implements Initializable
 
     userList.setItems(sortedData);
 
-
-
-
-
-
-
         
     }
 
@@ -221,12 +219,16 @@ public class MessagesContoller implements Initializable
         chatPane.getChildren().clear();
         MessagesContoller.selectedUser = selectedUser;
         LinkedList<MessageTo> messages = ClientHandler.getClientSocket().getMessages(ClientHandler.getLoggedInUser(), selectedUser);
+        messages.sort(Comparator.comparing(MessageTo::getMessage_date));
+
 
         for (MessageTo message : messages){
             if (message.getUuid_sender().equals(MessagesContoller.selectedUser.getUuid()))
-                speechBubbles.add(new SpeechBox(message, "LEFT"));
-            speechBubbles.add(new SpeechBox(message, "RIGHT"));        
+                speechBubbles.add(new SpeechBox(message, "RIGHT"));
+            else speechBubbles.add(new SpeechBox(message, "LEFT"));        
         }
+
+        RcLabel.setText(selectedUser.getPseudo());
     }
 
 @FXML
@@ -243,8 +245,65 @@ private void handleUserClick(MouseEvent event) {
         if (sender.getUuid().equals(selectedUser.getUuid()))
             speechBubbles.add(new SpeechBox(msg, "RIGHT"));
         else speechBubbles.add(new SpeechBox(msg, "LEFT"));
+        // BubbledTextFlow otherBubbled = new BubbledTextFlow(EmojiDisplayer.createEmojiAndTextNode(content));
+// 
     });
  }
+
+
+ public MFXTextField getMessageInput() {
+     return messageInput;
+ }
+
+ public static MessagesContoller getInstance(){
+    return instance;
 }
 
 
+//  @FXML
+//     private void emojiSelectorBtnAction(ActionEvent event) {
+//         try {
+//             // Load the FXML file for the new scene
+//             FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("fxml/EmojiSelectorUI.fxml"));
+//             Parent root = loader.load();
+            
+//             // Get the controller for the new scene
+//             EmojiSelectorController newSceneController = loader.getController();
+            
+//             // Create a new stage
+//             Stage newStage = new Stage();
+//             newStage.setTitle("Emojie Selector");
+            
+//             Scene scene = new Scene(root);
+//             newStage.setScene(scene);
+            
+//             newStage.show();
+//         } catch (IOException e) {
+//             e.printStackTrace();
+//         }
+//     }
+
+    @FXML
+    private void emojiSelectorBtnAction(ActionEvent event) {
+        if (emojiSelectorStage != null && emojiSelectorStage.isShowing()) {
+            // Close the emoji selector
+            emojiSelectorStage.close();
+        } else {
+            try {
+                emojiSelectorStage = new Stage();
+                FXMLLoader loader = new FXMLLoader(ResourceLoader.loadURL("fxml/EmojiSelectorUI.fxml"));
+                loader.setControllerFactory(c -> new EmojiSelectorController(emojiSelectorStage ,stage));
+                Parent root = loader.load();
+                Scene scene = new Scene(root);
+                emojiSelectorStage.setTitle("Emoji Piker");
+                emojiSelectorStage.setScene(scene);
+                emojiSelectorStage.setResizable(true);
+                emojiSelectorStage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+}

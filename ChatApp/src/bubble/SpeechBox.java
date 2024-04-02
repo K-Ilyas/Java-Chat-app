@@ -12,14 +12,13 @@ import javafx.scene.shape.SVGPath;
 import model.MessageTo;
 
 
-
+// rgb(37, 150, 190)
 public class SpeechBox extends HBox{
-    private Color DEFAULT_SENDER_COLOR = Color.GOLD;
-    private Color DEFAULT_RECEIVER_COLOR = Color.LIMEGREEN;
+    private Color DEFAULT_SENDER_COLOR = Color.rgb(37, 150, 190);
+    private Color DEFAULT_RECEIVER_COLOR = Color.rgb(140,57,204);
     private Background DEFAULT_SENDER_BACKGROUND, DEFAULT_RECEIVER_BACKGROUND;
 
     private String message;
-    private String sender;
     private String direction;
 
     private Label displayedText;
@@ -27,7 +26,6 @@ public class SpeechBox extends HBox{
 
     public SpeechBox(MessageTo messageTo, String right){
         this.message = messageTo.getMessage();
-        this.sender = messageTo.getUuid_sender();
         this.direction = right;
         initialiseDefaults();
         setupElements();
@@ -41,9 +39,10 @@ public class SpeechBox extends HBox{
     }
 
     private void setupElements(){
-        displayedText = new Label(sender+"->"+message);
+        displayedText = new Label(message);
         displayedText.setPadding(new Insets(5));
         displayedText.setWrapText(true);
+        displayedText.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-font-family: Arial;");
         directionIndicator = new SVGPath();
 
         if(direction .equals("LEFT")){

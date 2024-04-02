@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import io.github.palexdev.materialfx.controls.MFXTextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ChannelName">
+   <children>
+      <Label layoutX="164.0" layoutY="21.0" prefHeight="50.0" prefWidth="270.0" text="Personalize your Room">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+      </Label>
+      <Text fill="#8f8a8a" layoutX="207.0" layoutY="83.0" strokeType="OUTSIDE" strokeWidth="0.0" text="    Give your room a personality    by choosing a name and an icon " wrappingWidth="178.80078125" />
+      <MFXTextField fx:id="roomname" layoutX="32.0" layoutY="275.0" prefHeight="49.0" prefWidth="392.0" promptText="room name" />
+      <Label layoutX="34.0" layoutY="251.0" prefHeight="17.0" prefWidth="83.0" text="ROOM NAME">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <AnchorPane layoutY="340.0" prefHeight="59.0" prefWidth="600.0" style="-fx-background-color: #DCDCDC;">
+         <children>
+            <MFXButton fx:id="create" layoutX="495.0" layoutY="17.0" onAction="#Create" prefHeight="34.0" prefWidth="77.0" style="-fx-background-color: #9a06aa; -fx-border-radius: 5; -fx-border-color: black; -fx-text-fill: white;" text="Create">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </MFXButton>
+            <MFXButton fx:id="back" layoutX="29.0" layoutY="17.0" onAction="#back" prefHeight="34.0" prefWidth="77.0" style="-fx-border-radius: 5; -fx-border-color: black; -fx-text-fill: black;" text="Back">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </MFXButton>
+         </children>
+      </AnchorPane>
+      <StackPane fx:id="imagePane" layoutX="189.0" layoutY="138.0" maxHeight="100" maxWidth="200" minHeight="100" minWidth="200" />
+
+      <ImageView fx:id="imageView" fitHeight="137.0" fitWidth="200.0" layoutX="17.0" layoutY="63.0" pickOnBounds="true" preserveRatio="true" />
+        <MFXButton fx:id="choose" layoutX="228.0" layoutY="166.0" onAction="#ChooseImage" prefHeight="34.0" prefWidth="111.0" style="-fx-border-radius: 5; -fx-border-color: black; -fx-text-fill: black;" text="ChooseImage">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </MFXButton>
+   </children>
+</AnchorPane>

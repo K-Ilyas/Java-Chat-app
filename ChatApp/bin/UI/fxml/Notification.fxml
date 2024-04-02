@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXScrollPane?>
+<?import io.github.palexdev.mfxcore.controls.Label?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<GridPane fx:id="rootPane" hgap="20.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="650.0" prefWidth="842.0" styleClass="grid-pane" stylesheets="@../css/ListViews.css" vgap="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.NotificationContoller">
+    <columnConstraints>
+        <ColumnConstraints halignment="CENTER" maxWidth="143.4" minWidth="143.4" prefWidth="143.4" />
+        <ColumnConstraints halignment="CENTER" maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+        <ColumnConstraints halignment="CENTER" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
+        <RowConstraints prefHeight="32.0" />
+        <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="64.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+    </rowConstraints>
+    <padding>
+        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+    </padding>
+   
+   <StackPane fx:id="information" alignment="CENTER_RIGHT" styleClass="grid-background" GridPane.columnSpan="2147483647">
+      <children>
+         <HBox fx:id="leftInfo" alignment="CENTER_LEFT" prefHeight="66.0" prefWidth="796.0" spacing="12.0" StackPane.alignment="CENTER">
+            <opaqueInsets>
+               <Insets />
+            </opaqueInsets>
+            <children>
+               <Label fx:id="RcLabel" ellipsisString="//" prefHeight="68.0" prefWidth="230.0" text="Notifications">
+                  <font>
+                     <Font name="Arial Black" size="23.0" />
+                  </font>
+               </Label>
+            </children>
+            <StackPane.margin>
+               <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+            </StackPane.margin>
+         </HBox>
+      </children>
+   </StackPane>
+
+
+<StackPane prefHeight="150.0" prefWidth="200.0" styleClass="grid-background" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
+      <children>
+         <MFXScrollPane>
+            <content>
+               <VBox fx:id="Notification" prefHeight="536.0" prefWidth="800.0" spacing="12.0" />
+            </content>
+         </MFXScrollPane>
+      </children>
+   </StackPane>
+</GridPane>

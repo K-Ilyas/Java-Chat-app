@@ -1,7 +1,7 @@
 package Server;
 
-import DAO.*;
 import model.*;
+import DAO.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -12,10 +12,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+
+
 import java.util.Map.Entry;
 
 public class ServerClientHandler implements Runnable {
@@ -52,6 +60,7 @@ public class ServerClientHandler implements Runnable {
             UserInformation friend = null;
             MessageToDAO message_orm = new MessageToDAO(this.socketServer.getConnect());
             AmisDAO amis_orm = new AmisDAO(this.socketServer.getConnect());
+            RoomDAO room_orm = new RoomDAO(this.socketServer.getConnect());
 
             LinkedList<MessageTo> messages = null;
             LinkedList<Amis> amis = null;
@@ -174,9 +183,6 @@ public class ServerClientHandler implements Runnable {
                             soos.flush();
 
                             if (reciver != null) {
-
-
-                                System.out.println("SERVER SAID THAT JAVAFX IS SENDING THINGS");
                                 try {
                                     OutputStream outRecive = reciver.getOutputStream();
                                     ObjectOutputStream oosRecive = new ObjectOutputStream(outRecive);
@@ -307,10 +313,10 @@ public class ServerClientHandler implements Runnable {
                             oos.writeObject(friendRequest);
                             oos.flush();
 
-                            if (this.socketServer.findUserSocketMessage(friend.getUuid()) != null) {
+                            Socket reciver_notification = this.socketServer.findUserSocketMessage(friend.getUuid());
+                            if (reciver_notification != null) {
                                 try {
-                                    OutputStream outRecive = this.socketServer.findUserSocket(friend.getUuid())
-                                            .getOutputStream();
+                                    OutputStream outRecive = reciver_notification.getOutputStream();
                                     DataOutputStream dosRecive = new DataOutputStream(outRecive);
                                     ObjectOutputStream oosRecive = new ObjectOutputStream(outRecive);
 
@@ -339,17 +345,22 @@ public class ServerClientHandler implements Runnable {
                         FriendRequest friendRequestAccept = (FriendRequest) ois.readObject();
                         userInformation = (UserInformation) ois.readObject();
 
-                        if (amis_orm.acceptDclineInvitation(friendRequestAccept)) {
+                        System.out.println(friendRequestAccept.getUuidReceiver().equals(userInformation.getUuid()));
+
+                        if (friendRequestAccept.getUuidReceiver().equals(userInformation.getUuid())
+                                && amis_orm.acceptDclineInvitation(friendRequestAccept)) {
                             dos.writeInt(1);
                             dos.writeUTF("SERVER : YOUR INVITATION HAS BEEN ACCEPTED SUCCESFULLY");
                             dos.flush();
                             oos.writeObject(friendRequestAccept);
                             oos.flush();
 
-                            if (this.socketServer.findUserSocketMessage(friendRequestAccept.getUuidSender()) != null) {
+                            Socket reciver_notification = this.socketServer
+                                    .findUserSocketMessage(friendRequestAccept.getUuidSender());
+
+                            if (reciver_notification != null) {
                                 try {
-                                    OutputStream outRecive = this.socketServer
-                                            .findUserSocket(friendRequestAccept.getUuidSender()).getOutputStream();
+                                    OutputStream outRecive = reciver_notification.getOutputStream();
                                     DataOutputStream dosRecive = new DataOutputStream(outRecive);
                                     ObjectOutputStream oosRecive = new ObjectOutputStream(outRecive);
 
@@ -444,10 +455,187 @@ public class ServerClientHandler implements Runnable {
                             dos.flush();
                         }
                         break;
+                    case 14:
+                        // create a room with users in it and with admin
+                        userInformation = (UserInformation) ois.readObject();
+                        Room room = (Room) ois.readObject();
+
+                        @SuppressWarnings("unchecked")
+                        LinkedList<UserInformation> users = (LinkedList<UserInformation>) ois.readObject();
+                        if (room_orm.createRoomWithUsers(room, userInformation, users)) {
+                            dos.writeUTF("SERVER : YOUR ROOM HAS BEEN CREATED SUCCESFULLY");
+                            oos.writeObject(oos);
+                            dos.writeBoolean(true);
+                            dos.flush();
+                        } else {
+                            dos.writeUTF("SERVER : SOMETHING WENT WRONG PLEASE RETRY");
+                            dos.writeBoolean(false);
+                            dos.flush();
+                        }
+                        break;
+
+                    case 15:
+                        // get all rooms with users
+                        userInformation = (UserInformation) ois.readObject();
+                        Map<Room, Map<UserInformation, LinkedList<UserInformation>>> list = room_orm.getRoomsAndUsers();
+                        if (list.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE ROOMS");
+                            dos.flush();
+                            oos.writeObject(list);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO ROOMS");
+                            dos.flush();
+                        }
+                        break;
+
+                    case 16:
+                        // get all rooms with users for a specific user
+                        userInformation = (UserInformation) ois.readObject();
+                        Map<Room, Map<UserInformation, LinkedList<UserInformation>>> rooms_part = room_orm
+                                .getRoomsYouArePart(userInformation);
+
+                        if (rooms_part.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE ROOMS");
+                            dos.flush();
+                            oos.writeObject(rooms_part);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO ROOMS");
+                            dos.flush();
+                        }
+                        break;
+
+                    case 17:
+                        // send a message to a specific room
+
+                        String messageRoom = dis.readUTF();
+
+                        Room roomMessage = (Room) ois.readObject();
+
+                        userInformation = (UserInformation) ois.readObject();
+
+                        MessageRoom messageRoomObj = new MessageRoom(
+                                roomMessage.getUuid_room(), userInformation.getUuid(), messageRoom,
+                                LocalDateTime.now().toString(), false);
+
+                        System.out.println(roomMessage.getRoomname() + " - " + roomMessage.getUuid_room() + " - "
+                                + messageRoomObj.getMessage());
+
+                        boolean result = room_orm.sendMessageInRoom(userInformation, messageRoomObj);
+
+                        if (result) {
+
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOUR MESSAGE HAS BEEN SENT SUCCESFULLY");
+                            dos.flush();
+
+                            LinkedList<UserInformation> usersConnected = room_orm
+                                    .getUsersInRoom(roomMessage.getUuid_room());
+                            Map<UserInformation, Socket> usersInRoom = this.socketServer.getMsg_table();
+                            for (Entry<UserInformation, Socket> entry : usersInRoom.entrySet()) {
+
+                                if (entry.getKey().compareTo(userInformation) == 0
+                                        || usersConnected.contains(entry.getKey())) {
+
+                                    System.out.println("SENDING MESSAGE TO : " + entry.getKey().getUuid());
+                                    try {
+                                        OutputStream outRecive = entry.getValue().getOutputStream();
+                                        ObjectOutputStream oosRecive = new ObjectOutputStream(outRecive);
+                                        DataOutputStream dosRecive = new DataOutputStream(outRecive);
+
+                                        dosRecive.writeInt(3);
+                                        dosRecive.flush();
+                                        oosRecive.writeObject(userInformation);
+                                        oosRecive.flush();
+                                        oosRecive.writeObject(messageRoomObj);
+                                        oosRecive.flush();
+
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+
+                        } else {
+                            dos.write(0);
+                            dos.writeUTF("SERVER : SOMETHING WENT WRONG PLEASE RETRY");
+                            dos.flush();
+                        }
+                        break;
+
+                    case 18:
+                        // get all messages in a room
+                        userInformation = (UserInformation) ois.readObject();
+                        Room roomMessages = (Room) ois.readObject();
+                        Hashtable<UserInformation, MessageRoom> messagesRoom = room_orm
+                                .getMessagesInRoom(roomMessages.getUuid_room());
+                        if (messagesRoom.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE MESSAGES");
+                            dos.flush();
+                            oos.writeObject(messagesRoom);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO MESSAGES");
+                            dos.flush();
+                        }
+                        break;
+
+                    // all users that are not friends to a specific user
+                    case 19:
+
+                        userInformation = (UserInformation) ois.readObject();
+                        LinkedList<UserInformation> otherUsersNotFriends = amis_orm.notFrineds(userInformation);
+
+                        if (otherUsersNotFriends.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE OTHER USERS NOT FRIENDS");
+                            dos.flush();
+                            oos.writeObject(otherUsersNotFriends);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO OTHER USERS NOT FRIENDS");
+                            dos.flush();
+                        }
+                        break;
+                    case 20:
+                        userInformation = (UserInformation) ois.readObject();
+
+                        UserInformation frined = (UserInformation) ois.readObject();
+
+                        break;
+
+                    case 21 :
+                        
+                        userInformation = (UserInformation) ois.readObject();
+                        LinkedList<UserInformation> usersNotInRoom = amis_orm.notFrinedsAndNotSentRequest(userInformation);
+                        if (usersNotInRoom.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE USERS NOT IN ROOM");
+                            dos.flush();
+                            oos.writeObject(usersNotInRoom);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO USERS NOT IN ROOM");
+                            dos.flush();
+                        }
+                        break;
+                    
 
                     default:
                         System.out.println("You have an error in your cmmande please retrait");
                         break;
+                    
                 }
 
             }
@@ -590,6 +778,9 @@ public class ServerClientHandler implements Runnable {
             e.printStackTrace();
         } catch (ClassNotFoundException e1) {
             e1.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
             try {
                 if (this.client != null) {

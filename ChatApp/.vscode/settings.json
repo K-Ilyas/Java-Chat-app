@@ -31,7 +31,9 @@
         "c:\\Users\\pc\\Downloads\\JAVAFX\\javafx-sdk-21.0.2\\lib\\javafx.media.jar",
         "c:\\Users\\pc\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\\33BGIDPH\\javafx.media[1].jar",
         "c:\\Users\\pc\\Downloads\\JAVAFX\\javafx-sdk-21.0.2\\lib\\javafx.swing.jar",
-        "c:\\Users\\pc\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\\SPX7AIS1\\javafx.swing[1].jar"
+        "c:\\Users\\pc\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\\SPX7AIS1\\javafx.swing[1].jar",
+        "lib/slf4j-api-1.7.2.jar",
+        "lib/gson-2.10.1.jar"
       ]
     }
 }
