@@ -1,6 +1,8 @@
-package dao;
+package classes;
 
-public class MessageRoom {
+import java.io.Serializable;
+
+public class MessageRoom implements Serializable{
     private String uuidRoom;
     private String uuidUser;
     private String message;
@@ -30,8 +32,6 @@ public class MessageRoom {
         return messageDate;
     }
 
-
-
     public String getUuidRoom() {
         return uuidRoom;
     }
@@ -39,7 +39,7 @@ public class MessageRoom {
     public String getUuidUser() {
         return uuidUser;
     }
-
+    
     public void setDeleted(boolean isDeleted) {
         this.isDeleted = isDeleted;
     }

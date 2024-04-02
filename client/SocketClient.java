@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import classes.API;
 import classes.FriendRequest;
+import classes.MessageRoom;
 import classes.MessageTo;
 import classes.Room;
 import classes.UserInformation;
@@ -422,6 +423,56 @@ public class SocketClient {
                     return (Map<Room, Map<UserInformation, LinkedList<UserInformation>>>) ois.readObject();
                 } else
                     System.out.println(dis.readUTF());
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+    // send a message to a specific room
+
+    public boolean sendMessageToRoom(UserInformation user, Room room, String message) {
+        try {
+            dos.writeInt(17);
+            dos.flush();
+            dos.writeUTF(message);
+            dos.flush();
+            bos.writeObject(room);
+            bos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+
+                System.out.println(dis.readUTF());
+                return true;
+            } else {
+                System.out.println("There is an issue");
+                System.out.println(dis.readUTF());
+                return false;
+            }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Hashtable<UserInformation, MessageRoom> getMessagesFromRoom(UserInformation user, Room room) {
+        try {
+            dos.writeInt(18);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            bos.writeObject(room);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                return (Hashtable<UserInformation, MessageRoom>) ois.readObject();
+            } else {
+                System.out.println(dis.readUTF());
             }
         } catch (IOException e) {
             API.printMessageClient(e.getMessage());

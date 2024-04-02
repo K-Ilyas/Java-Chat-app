@@ -505,26 +505,83 @@ public class ServerClientHandler implements Runnable {
                         break;
 
                     case 17:
-
                         // send a message to a specific room
-                        userInformation = (UserInformation) ois.readObject();
-                        Room roomMessage = (Room) ois.readObject();
+
                         String messageRoom = dis.readUTF();
 
-                        MessageRoom messageRoomObj = new MessageRoom(userInformation.getUuid(),
-                                roomMessage.getUuid_room(), messageRoom, "", false);
+                        Room roomMessage = (Room) ois.readObject();
 
-                        if (room_orm.sendMessageInRoom(userInformation, messageRoomObj)) {
-                            dos.write(1);
+                        userInformation = (UserInformation) ois.readObject();
+
+                        MessageRoom messageRoomObj = new MessageRoom(
+                                roomMessage.getUuid_room(), userInformation.getUuid(), messageRoom,
+                                LocalDateTime.now().toString(), false);
+
+                        System.out.println(roomMessage.getRoomname() + " - " + roomMessage.getUuid_room() + " - "
+                                + messageRoomObj.getMessage());
+
+                        boolean result = room_orm.sendMessageInRoom(userInformation, messageRoomObj);
+
+                        if (result) {
+
+                            dos.writeInt(1);
                             dos.writeUTF("SERVER : YOUR MESSAGE HAS BEEN SENT SUCCESFULLY");
                             dos.flush();
-                            oos.writeObject(messageRoomObj);
-                            oos.flush();
+
+                            LinkedList<UserInformation> usersConnected = room_orm
+                                    .getUsersInRoom(roomMessage.getUuid_room());
+                            Map<UserInformation, Socket> usersInRoom = this.socketServer.getMsg_table();
+                            for (Entry<UserInformation, Socket> entry : usersInRoom.entrySet()) {
+
+                                if (entry.getKey().compareTo(userInformation) == 0
+                                        || usersConnected.contains(entry.getKey())) {
+
+                                    System.out.println("SENDING MESSAGE TO : " + entry.getKey().getUuid());
+                                    try {
+                                        OutputStream outRecive = entry.getValue().getOutputStream();
+                                        ObjectOutputStream oosRecive = new ObjectOutputStream(outRecive);
+                                        DataOutputStream dosRecive = new DataOutputStream(outRecive);
+
+                                        dosRecive.writeInt(3);
+                                        dosRecive.flush();
+                                        oosRecive.writeObject(userInformation);
+                                        oosRecive.flush();
+                                        oosRecive.writeObject(messageRoomObj);
+                                        oosRecive.flush();
+
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+
                         } else {
                             dos.write(0);
                             dos.writeUTF("SERVER : SOMETHING WENT WRONG PLEASE RETRY");
                             dos.flush();
                         }
+                        break;
+
+                    case 18:
+                        // get all messages in a room
+                        userInformation = (UserInformation) ois.readObject();
+                        Room roomMessages = (Room) ois.readObject();
+                        Hashtable<UserInformation, MessageRoom> messagesRoom = room_orm
+                                .getMessagesInRoom(roomMessages.getUuid_room());
+                        if (messagesRoom.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE MESSAGES");
+                            dos.flush();
+                            oos.writeObject(messagesRoom);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO MESSAGES");
+                            dos.flush();
+                        }
+                        break;
                     default:
                         System.out.println("You have an error in your cmmande please retrait");
                         break;

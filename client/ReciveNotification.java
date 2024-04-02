@@ -1,9 +1,11 @@
 package client;
+
 import java.net.Socket;
 
 import classes.FriendRequest;
 import classes.MessageTo;
 import classes.UserInformation;
+import classes.MessageRoom;
 
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
@@ -26,7 +28,7 @@ public class ReciveNotification implements Runnable {
                 ObjectInputStream ois = new ObjectInputStream(in);
                 DataInputStream din = new DataInputStream(in)) {
             int status = 0;
-            
+
             while (this.shouldRun) {
                 System.out.println("Waiting for notification");
                 status = din.readInt();
@@ -42,6 +44,15 @@ public class ReciveNotification implements Runnable {
                     System.out.println("Recived friend request from " + sender.getUuid());
                     FriendRequest friendRequest = (FriendRequest) ois.readObject();
                     System.out.println("Recived friend request from " + friendRequest);
+                } else if (status == 3) {
+                    // recive a message in room
+                    System.out.println("Notification recived : message in room");
+                    UserInformation sender = (UserInformation) ois.readObject();
+                    System.out.println("Recived message from " + sender.getUuid());
+                    MessageRoom message = (MessageRoom) ois.readObject();
+                    System.out.println("Recived message from " + message);
+                } else if (status == 4) {
+
                 }
             }
 
@@ -53,7 +64,7 @@ public class ReciveNotification implements Runnable {
             e.printStackTrace();
         }
     }
-    
+
     public void setShouldRun(boolean shouldRun) {
         synchronized (this) {
             this.shouldRun = shouldRun;

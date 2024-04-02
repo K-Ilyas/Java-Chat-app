@@ -3,6 +3,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import classes.FriendRequest;
+import classes.MessageRoom;
 import classes.Room;
 import classes.UserInformation;
 import client.SocketClient;
@@ -68,13 +69,13 @@ public class Examplle {
 
         Map<Room, Map<UserInformation, LinkedList<UserInformation>>> rooms = client.getRoomsWithUsers(user);
 
+        Room room_tosent = null;
         if (rooms == null)
             System.out.println("No rooms");
         else
             for (Room room : rooms.keySet()) {
 
-                System.out.println(room.getRoomname());
-
+                room_tosent = room;
                 Map<UserInformation, LinkedList<UserInformation>> users = rooms.get(room);
 
                 for (UserInformation userInformation : users.keySet()) {
@@ -85,6 +86,18 @@ public class Examplle {
                     }
                 }
 
+            }
+
+        client.sendMessageToRoom(user, room_tosent, "hello");
+
+        Hashtable<UserInformation, MessageRoom> messages = client.getMessagesFromRoom(user, room_tosent);
+
+        if (messages == null)
+            System.out.println("No messages");
+        else
+            for (UserInformation userInformation : messages.keySet()) {
+                System.out.println(userInformation.getPseudo());
+                System.out.println(messages.get(userInformation).getMessage());
             }
 
     }

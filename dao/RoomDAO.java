@@ -9,6 +9,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 
+import classes.MessageRoom;
 import classes.Room;
 import classes.UserInformation;
 
@@ -213,21 +214,21 @@ public class RoomDAO extends DAO<Room> {
   // send a message in a room
 
   public boolean sendMessageInRoom(UserInformation user, MessageRoom messageRoom) throws SQLException {
-    String query = "INSERT INTO messageroom (uuid_room,uuid_user,message) VALUES (?,?,?)";
+    String query = "INSERT INTO messageroom (uuid_room,uuid_user,message,message_date) VALUES (?,?,?,?)";
     try (PreparedStatement statement = this.connect.prepareStatement(query)) {
 
       statement.setString(1, messageRoom.getUuidRoom());
       statement.setString(2, user.getUuid());
       statement.setString(3, messageRoom.getMessage());
+      statement.setString(4, messageRoom.getMessageDate());
 
       statement.executeUpdate();
 
       // Update messageRoom
 
-      // get the id of the inserted message 
+      // get the id of the inserted message
 
-
-      String query2 = "SELECT * FROM messageroom WHERE uuid_user = ? AND uuid_room = ? ORDER BY id DESC LIMIT 1";
+      String query2 = "SELECT * FROM messageroom WHERE uuid_user = ? AND uuid_room = ? ORDER BY message_id DESC LIMIT 1";
       try (PreparedStatement statement2 = this.connect.prepareStatement(query2)) {
         statement2.setString(1, user.getUuid());
         statement2.setString(2, messageRoom.getUuidRoom());
@@ -235,21 +236,69 @@ public class RoomDAO extends DAO<Room> {
         try (ResultSet resultSet = statement2.executeQuery()) {
           if (resultSet.next()) {
             messageRoom.setDeleted(resultSet.getBoolean("isDeleted"));
-            messageRoom.setMessageDate(resultSet.getString("date"));
+            messageRoom.setMessageDate(resultSet.getString("message_date"));
             messageRoom.setUuidUser(resultSet.getString("uuid_user"));
             messageRoom.setUuidRoom(resultSet.getString("uuid_room"));
             messageRoom.setMessage(resultSet.getString("message"));
+            // System.out.println("HHHHHH it is ME HHHHHHHHHHHHHHHHHHHHh");
+
           }
         }
+
         return true;
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      return false;
+
+      return true;
     } catch (SQLException e) {
       e.printStackTrace();
       return false;
     }
+  }
+
+  // get all message with the user that sent that message in a room
+  public Hashtable<UserInformation, MessageRoom> getMessagesInRoom(String uuid_room) {
+    Hashtable<UserInformation, MessageRoom> messages = new Hashtable<UserInformation, MessageRoom>();
+    try {
+      String query = "SELECT * FROM messageroom WHERE uuid_room = ?";
+      PreparedStatement statement = this.connect.prepareStatement(query);
+      statement.setString(1, uuid_room);
+      ResultSet result = statement.executeQuery();
+      while (result.next()) {
+        String uuid_user = result.getString("uuid_user");
+        UserInformation user = new UserDAO(this.connect).find(uuid_user);
+        MessageRoom message = new MessageRoom(
+            result.getString("uuid_room"),
+            result.getString("uuid_user"),
+            result.getString("message"),
+            result.getString("message_date"),
+            result.getBoolean("isDeleted"));
+        messages.put(user, message);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return messages;
+  }
+
+  // get all users connected in a room
+  public LinkedList<UserInformation> getUsersInRoom(String uuid_room) {
+    LinkedList<UserInformation> users = new LinkedList<UserInformation>();
+    try {
+      String query = "SELECT * FROM connected WHERE uuid_room = ?";
+      PreparedStatement statement = this.connect.prepareStatement(query);
+      statement.setString(1, uuid_room);
+      ResultSet result = statement.executeQuery();
+      while (result.next()) {
+        String uuid_user = result.getString("uuid_user");
+        UserInformation user = new UserDAO(this.connect).find(uuid_user);
+        users.add(user);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return users;
   }
 
   @Override
