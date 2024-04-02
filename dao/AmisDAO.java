@@ -122,9 +122,9 @@ public class AmisDAO extends DAO<Amis> {
 
   public boolean acceptDclineInvitation(FriendRequest request) {
     PreparedStatement statement = null;
-    if (this.findInvitationExist(request.getUuidSender(), request.getUuidReceiver(),2)) {
+    if (this.findInvitationExist(request.getUuidSender(), request.getUuidReceiver(), 2)) {
       try {
-        if (request.getRequestStatus().equals("accepted") ||  request.getRequestStatus().equals("rejected")) {
+        if (request.getRequestStatus().equals("accepted") || request.getRequestStatus().equals("rejected")) {
           String query = "UPDATE friend_request SET request_status = ? WHERE uuid_sender = ? and uuid_reciver = ?";
           statement = this.connect.prepareStatement(query);
           statement.setString(1, request.getRequestStatus());
@@ -136,7 +136,7 @@ public class AmisDAO extends DAO<Amis> {
         } else {
           return false;
         }
-        
+
         if (request.getRequestStatus().equals("accepted")) {
           Amis ami = new Amis();
           ami.setUuid_user(request.getUuidSender());
@@ -169,9 +169,9 @@ public class AmisDAO extends DAO<Amis> {
     try {
       String query = "";
 
-      if(state == 1){
+      if (state == 1) {
         query = "SELECT * FROM friend_request WHERE (uuid_sender = ? and uuid_reciver=?) or (uuid_reciver = ? and uuid_sender= ?) and ( request_status = 'pending' or request_status = 'accepted')";
-      }else if( state == 2){
+      } else if (state == 2) {
         query = "SELECT * FROM friend_request WHERE (uuid_sender = ? and uuid_reciver=?) or (uuid_reciver = ? and uuid_sender= ?) and ( request_status = 'pending')";
       }
 
@@ -292,7 +292,7 @@ public class AmisDAO extends DAO<Amis> {
   public Boolean sendInvitation(FriendRequest request) {
 
     PreparedStatement statement = null;
-    if (!this.findInvitationExist(request.getUuidSender(), request.getUuidReceiver(),1)) {
+    if (!this.findInvitationExist(request.getUuidSender(), request.getUuidReceiver(), 1)) {
       try {
         String query = "INSERT INTO friend_request (uuid_sender,uuid_reciver) VALUES (?,?)";
         statement = this.connect.prepareStatement(query);
@@ -332,6 +332,46 @@ public class AmisDAO extends DAO<Amis> {
 
   }
 
+  // user that are not friend of the current user
+
+  public LinkedList<UserInformation> notFrineds(UserInformation user) {
+    LinkedList<UserInformation> notFriends = new LinkedList<UserInformation>();
+    PreparedStatement statement = null;
+    ResultSet result = null;
+    try {
+      String query = "SELECT * FROM user WHERE uuid_user not in (SELECT amis.uuid_first_user FROM user inner join amis on user.uuid_user = amis.uuid_second_user where  user.uuid_user = ? UNION SELECT amis.uuid_second_user FROM user inner join amis  on user.uuid_user = amis.uuid_first_user  where user.uuid_user = ? ) and uuid_user != ?";
+      statement = this.connect.prepareStatement(query);
+      statement.setString(1, user.getUuid());
+      statement.setString(2, user.getUuid());
+      statement.setString(3, user.getUuid());
+      result = statement.executeQuery();
+      while (result.next()) {
+        UserInformation notFriend = new UserInformation();
+        notFriend.setUuid(result.getString("uuid_user"));
+        notFriend.setPseudo(result.getString("username"));
+        notFriend.setEmail(result.getString("email"));
+        notFriend.setImage(result.getString("image"));
+        notFriend.setIsadmin(result.getBoolean("isadmin"));
+        notFriends.add(notFriend);
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        if (result != null) {
+          result.close();
+        }
+        if (statement != null) {
+          statement.close();
+        }
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+    return notFriends;
+  }
+
   // find all friends of a user
   public LinkedList<UserInformation> findAllAmis(String uuid_user) {
     LinkedList<UserInformation> amis = new LinkedList<UserInformation>();
@@ -352,7 +392,7 @@ public class AmisDAO extends DAO<Amis> {
         ami.setIsadmin(result.getBoolean("isadmin"));
         amis.add(ami);
       }
-      
+
     } catch (SQLException e) {
       e.printStackTrace();
     } finally {

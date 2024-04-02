@@ -407,6 +407,10 @@ public class SocketClient {
         return null;
     }
 
+    // list of user that are not friends
+
+ 
+
     @SuppressWarnings("unchecked")
     public Map<Room, Map<UserInformation, LinkedList<UserInformation>>> getRoomsUserPartOf(UserInformation user) {
 
@@ -474,6 +478,27 @@ public class SocketClient {
             } else {
                 System.out.println(dis.readUTF());
             }
+        } catch (IOException e) {
+            API.printMessageClient(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            API.printMessageClient(e.getMessage());
+        }
+        return null;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public LinkedList<UserInformation> getNotFriends(UserInformation user) {
+        try {
+            dos.writeInt(19);
+            dos.flush();
+            bos.writeObject(user);
+            bos.flush();
+            if (dis.readInt() == 1) {
+                System.out.println(dis.readUTF());
+                return (LinkedList<UserInformation>) ois.readObject();
+            } else
+                System.out.println(dis.readUTF());
         } catch (IOException e) {
             API.printMessageClient(e.getMessage());
         } catch (ClassNotFoundException e) {

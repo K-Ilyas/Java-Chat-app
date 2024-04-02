@@ -582,6 +582,27 @@ public class ServerClientHandler implements Runnable {
                             dos.flush();
                         }
                         break;
+
+                    // all users that are not friends to a specific user
+                    case 19:
+
+                        userInformation = (UserInformation) ois.readObject();
+                        LinkedList<UserInformation> otherUsersNotFriends = amis_orm.notFrineds(userInformation);
+
+                        if (otherUsersNotFriends.size() != 0) {
+                            dos.writeInt(1);
+                            dos.writeUTF("SERVER : YOU HAVE OTHER USERS NOT FRIENDS");
+                            dos.flush();
+                            oos.writeObject(otherUsersNotFriends);
+                            oos.flush();
+                        } else {
+                            dos.writeInt(0);
+                            dos.writeUTF("SERVER : YOU HAVE NO OTHER USERS NOT FRIENDS");
+                            dos.flush();
+                        }
+
+                        break;
+
                     default:
                         System.out.println("You have an error in your cmmande please retrait");
                         break;

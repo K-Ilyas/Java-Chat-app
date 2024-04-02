@@ -100,5 +100,15 @@ public class Examplle {
                 System.out.println(messages.get(userInformation).getMessage());
             }
 
+        LinkedList<UserInformation> notFrineds = client.getNotFriends(user);
+        System.out.println("Not Friends : ");
+
+        if (notFrineds == null)
+            System.out.println("No not friends");
+        else
+            for (UserInformation userInformation : notFrineds) {
+                System.out.println(userInformation.getPseudo() + " - " + userInformation.getUuid());
+            }
+
     }
 }
