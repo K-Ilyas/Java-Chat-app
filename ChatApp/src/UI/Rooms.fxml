@@ -34,22 +34,22 @@
             <Image  url="images/logo.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="48.0" fitWidth="45.0" layoutX="469.0" layoutY="105.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="imageView2" fitHeight="48.0" fitWidth="45.0" layoutX="469.0" layoutY="105.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="images/logo.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="48.0" fitWidth="45.0" layoutX="274.0" layoutY="105.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="imageView3" fitHeight="48.0" fitWidth="45.0" layoutX="274.0" layoutY="105.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="images/logo.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="48.0" fitWidth="45.0" layoutX="82.0" layoutY="227.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="imageView4" fitHeight="48.0" fitWidth="45.0" layoutX="82.0" layoutY="227.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="images/logo.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="48.0" fitWidth="45.0" layoutX="275.0" layoutY="227.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="imageView5" fitHeight="48.0" fitWidth="45.0" layoutX="275.0" layoutY="227.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="images/logo.png" />
          </image>
@@ -104,7 +104,7 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="276.0" layoutY="156.0" text="AirPeds" underline="true">
+      <Label fx:id="nameRoom2" layoutX="276.0" layoutY="156.0" text="AirPeds" underline="true">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
